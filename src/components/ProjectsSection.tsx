@@ -1,39 +1,53 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ExternalLink, ChevronRight, Cpu, Shield, BrainCircuit } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-const projects = [
+const iconMap: Record<string, React.ComponentType<any>> = { Cpu, Shield, BrainCircuit };
+const defaultProjects = [
   {
-    title: "WildSentry",
-    icon: Cpu,
+    id: "1", title: "WildSentry", icon_name: "Cpu",
     description: "A wildlife monitoring system designed to reduce human-wildlife conflict using sensors and communication systems.",
     features: ["GPS Tracking", "Pulse Monitoring", "Accelerometer Detection", "Solar-Powered", "GSM Communication"],
-    tech: ["Arduino", "GPS Module", "GSM Module", "Solar Panel", "Sensors"],
-    youtubeChannel: "https://www.youtube.com/@WildSentry",
-    color: "from-emerald-500/20 to-cyan-500/20",
+    technologies: ["Arduino", "GPS Module", "GSM Module", "Solar Panel", "Sensors"],
+    youtube_link: "https://www.youtube.com/@WildSentry",
+    color_from: "emerald-500/20", color_to: "cyan-500/20",
   },
   {
-    title: "EV Armour",
-    icon: Shield,
+    id: "2", title: "EV Armour", icon_name: "Shield",
     description: "A safety system designed to prevent electric vehicle battery fires with real-time monitoring and automatic responses.",
     features: ["Battery Temp Monitoring", "Smoke Detection", "Auto Battery Disconnect", "Real-Time Alerts", "Display System"],
-    tech: ["Temperature Sensors", "Smoke Sensors", "Relay Module", "LCD Display", "Microcontroller"],
-    color: "from-orange-500/20 to-red-500/20",
+    technologies: ["Temperature Sensors", "Smoke Sensors", "Relay Module", "LCD Display", "Microcontroller"],
+    youtube_link: null, color_from: "orange-500/20", color_to: "red-500/20",
   },
   {
-    title: "Ric – AI IoT Pendant",
-    icon: BrainCircuit,
+    id: "3", title: "Ric – AI IoT Pendant", icon_name: "BrainCircuit",
     description: "A wearable AI assistant device designed to function as a secondary phone and personal assistant.",
     features: ["Voice Assistant", "Call & Message", "SOS Emergency Alerts", "Offline AI", "Gesture Control", "Emotion Detection"],
-    tech: ["AI/ML", "IoT", "Bluetooth", "Microphone", "Accelerometer"],
-    color: "from-violet-500/20 to-blue-500/20",
+    technologies: ["AI/ML", "IoT", "Bluetooth", "Microphone", "Accelerometer"],
+    youtube_link: null, color_from: "violet-500/20", color_to: "blue-500/20",
   },
 ];
+
+const colorMap: Record<string, string> = {
+  "emerald-500/20": "from-emerald-500/20 to-cyan-500/20",
+  "orange-500/20": "from-orange-500/20 to-red-500/20",
+  "violet-500/20": "from-violet-500/20 to-blue-500/20",
+};
 
 const ProjectsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [activeProject, setActiveProject] = useState(0);
+  const [projects, setProjects] = useState(defaultProjects);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const { data } = await supabase.from("projects").select("*").order("sort_order");
+      if (data && data.length > 0) setProjects(data);
+    };
+    fetchProjects();
+  }, []);
 
   return (
     <section id="projects" className="section-padding bg-card/30" ref={ref}>
@@ -48,65 +62,58 @@ const ProjectsSection = () => {
           </h2>
           <div className="w-16 h-1 bg-primary mx-auto mb-10 rounded-full" />
 
-          {/* Project selector tabs */}
           <div className="flex flex-wrap justify-center gap-3 mb-10">
-            {projects.map((p, i) => (
-              <button
-                key={p.title}
-                onClick={() => setActiveProject(i)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-display text-xs font-semibold transition-all ${
-                  activeProject === i
-                    ? "bg-primary text-primary-foreground box-glow"
-                    : "bg-secondary text-secondary-foreground hover:bg-surface-hover"
-                }`}
-              >
-                <p.icon size={16} />
-                {p.title}
-              </button>
-            ))}
+            {projects.map((p, i) => {
+              const Icon = iconMap[p.icon_name || "Cpu"] || Cpu;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => setActiveProject(i)}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-display text-xs font-semibold transition-all ${
+                    activeProject === i
+                      ? "bg-primary text-primary-foreground box-glow"
+                      : "bg-secondary text-secondary-foreground hover:bg-surface-hover"
+                  }`}
+                >
+                  <Icon size={16} />
+                  {p.title}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Active project */}
-          {projects.map((project, i) => (
-            activeProject === i && (
+          {projects.map((project, i) => {
+            if (activeProject !== i) return null;
+            const Icon = iconMap[project.icon_name || "Cpu"] || Cpu;
+            const gradient = colorMap[project.color_from || ""] || "from-emerald-500/20 to-cyan-500/20";
+
+            return (
               <motion.div
-                key={project.title}
+                key={project.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className={`bg-gradient-to-br ${project.color} border border-border rounded-2xl p-6 sm:p-10`}
+                className={`bg-gradient-to-br ${gradient} border border-border rounded-2xl p-6 sm:p-10`}
               >
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
                     <div className="flex items-center gap-3 mb-4">
-                      <project.icon className="text-primary" size={32} />
-                      <h3 className="font-display text-xl sm:text-2xl font-bold text-foreground">
-                        {project.title}
-                      </h3>
+                      <Icon className="text-primary" size={32} />
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-foreground">{project.title}</h3>
                     </div>
-                    <p className="text-muted-foreground mb-6 font-body leading-relaxed">
-                      {project.description}
-                    </p>
+                    <p className="text-muted-foreground mb-6 font-body leading-relaxed">{project.description}</p>
 
-                    {project.youtubeChannel && (
-                      <a
-                        href={project.youtubeChannel}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-primary hover:underline text-sm font-medium mb-6"
-                      >
-                        <ExternalLink size={14} />
-                        Watch on YouTube
+                    {project.youtube_link && (
+                      <a href={project.youtube_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline text-sm font-medium mb-6">
+                        <ExternalLink size={14} /> Watch on YouTube
                       </a>
                     )}
 
                     <div className="mb-6">
                       <h4 className="font-display text-xs tracking-wider text-primary uppercase mb-3">Technologies</h4>
                       <div className="flex flex-wrap gap-2">
-                        {project.tech.map((t) => (
-                          <span key={t} className="px-3 py-1 text-xs bg-secondary text-secondary-foreground rounded-full">
-                            {t}
-                          </span>
+                        {(project.technologies || []).map((t) => (
+                          <span key={t} className="px-3 py-1 text-xs bg-secondary text-secondary-foreground rounded-full">{t}</span>
                         ))}
                       </div>
                     </div>
@@ -115,7 +122,7 @@ const ProjectsSection = () => {
                   <div>
                     <h4 className="font-display text-xs tracking-wider text-primary uppercase mb-4">Key Features</h4>
                     <div className="space-y-3">
-                      {project.features.map((f) => (
+                      {(project.features || []).map((f) => (
                         <div key={f} className="flex items-center gap-3 bg-background/50 rounded-lg px-4 py-3">
                           <ChevronRight className="text-primary shrink-0" size={16} />
                           <span className="text-sm text-foreground font-body">{f}</span>
@@ -125,8 +132,8 @@ const ProjectsSection = () => {
                   </div>
                 </div>
               </motion.div>
-            )
-          ))}
+            );
+          })}
         </motion.div>
       </div>
     </section>

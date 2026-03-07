@@ -1,26 +1,32 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { FileText, Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-const documents = [
-  { title: "Report Card – Class 9", category: "Report Cards" },
-  { title: "Report Card – Class 10", category: "Report Cards" },
-  { title: "Competition Certificates", category: "Certificates" },
-  { title: "Project Documentation", category: "Projects" },
+const defaultDocs = [
+  { id: "1", title: "Report Card – Class 9", category: "Report Cards", file_url: null },
+  { id: "2", title: "Report Card – Class 10", category: "Report Cards", file_url: null },
+  { id: "3", title: "Competition Certificates", category: "Certificates", file_url: null },
+  { id: "4", title: "Project Documentation", category: "Projects", file_url: null },
 ];
 
 const DocumentsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [documents, setDocuments] = useState(defaultDocs);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase.from("documents").select("*").order("created_at", { ascending: false });
+      if (data && data.length > 0) setDocuments(data);
+    };
+    fetch();
+  }, []);
 
   return (
     <section id="documents" className="section-padding" ref={ref}>
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 40 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-2xl sm:text-4xl font-bold text-foreground mb-2 text-center">
             <span className="text-primary">Documents</span>
           </h2>
@@ -29,7 +35,7 @@ const DocumentsSection = () => {
           <div className="space-y-3">
             {documents.map((doc, i) => (
               <motion.div
-                key={doc.title}
+                key={doc.id}
                 initial={{ opacity: 0, y: 15 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: 0.1 * i }}
@@ -42,17 +48,16 @@ const DocumentsSection = () => {
                     <p className="text-xs text-muted-foreground">{doc.category}</p>
                   </div>
                 </div>
-                <button className="flex items-center gap-1.5 px-4 py-2 text-xs font-display font-semibold text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-colors">
-                  <Download size={14} />
-                  Download
-                </button>
+                {doc.file_url ? (
+                  <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-4 py-2 text-xs font-display font-semibold text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-colors">
+                    <Download size={14} /> Download
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Coming soon</span>
+                )}
               </motion.div>
             ))}
           </div>
-
-          <p className="text-center text-xs text-muted-foreground mt-6 font-body">
-            Documents will be available for download once uploaded via the admin dashboard.
-          </p>
         </motion.div>
       </div>
     </section>
