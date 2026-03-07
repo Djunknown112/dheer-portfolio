@@ -14,7 +14,203 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          created_at: string
+          date: string | null
+          description: string
+          icon_name: string | null
+          id: string
+          photo_url: string | null
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string | null
+          description: string
+          icon_name?: string | null
+          id?: string
+          photo_url?: string | null
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string | null
+          description?: string
+          icon_name?: string | null
+          id?: string
+          photo_url?: string | null
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          category: string
+          created_at: string
+          file_url: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      photos: {
+        Row: {
+          caption: string
+          category: string
+          created_at: string
+          id: string
+          image_url: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          caption: string
+          category?: string
+          created_at?: string
+          id?: string
+          image_url: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          project_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          project_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          project_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          category: string | null
+          color_from: string | null
+          color_to: string | null
+          created_at: string
+          description: string
+          features: string[] | null
+          icon_name: string | null
+          id: string
+          sort_order: number | null
+          technologies: string[] | null
+          title: string
+          updated_at: string
+          youtube_link: string | null
+        }
+        Insert: {
+          category?: string | null
+          color_from?: string | null
+          color_to?: string | null
+          created_at?: string
+          description: string
+          features?: string[] | null
+          icon_name?: string | null
+          id?: string
+          sort_order?: number | null
+          technologies?: string[] | null
+          title: string
+          updated_at?: string
+          youtube_link?: string | null
+        }
+        Update: {
+          category?: string | null
+          color_from?: string | null
+          color_to?: string | null
+          created_at?: string
+          description?: string
+          features?: string[] | null
+          icon_name?: string | null
+          id?: string
+          sort_order?: number | null
+          technologies?: string[] | null
+          title?: string
+          updated_at?: string
+          youtube_link?: string | null
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
