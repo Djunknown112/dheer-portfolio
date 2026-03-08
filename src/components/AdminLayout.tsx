@@ -46,7 +46,7 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-60 bg-card border-r border-border flex flex-col transform transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <h1 className="font-display text-lg font-bold text-primary">DJ Admin</h1>
+          <h1 className="font-display text-lg font-bold text-primary">Portfolio</h1>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground">
             <X size={20} />
           </button>
