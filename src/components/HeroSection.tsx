@@ -40,7 +40,7 @@ const HeroSection = () => {
         >
           Dheer Joshi
           <span className="block text-primary text-glow text-xl sm:text-2xl lg:text-3xl mt-2 font-medium">
-            Future Computer Science Engineer
+            Young Innovator & Tech Builder
           </span>
         </motion.h1>
 
