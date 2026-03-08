@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_highlights: {
+        Row: {
+          created_at: string
+          description: string
+          icon_name: string | null
+          id: string
+          label: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon_name?: string | null
+          id?: string
+          label: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon_name?: string | null
+          id?: string
+          label?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           created_at: string
