@@ -1,18 +1,40 @@
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
-import { GraduationCap, Target, Lightbulb, Crown } from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import { useRef, useEffect, useState } from "react";
+import { icons, Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-const highlights = [
-  { icon: GraduationCap, label: "Class 10 CBSE", desc: "PCM track ahead" },
-  { icon: Target, label: "B.Tech CSE", desc: "Career goal" },
-  { icon: Crown, label: "Head Boy", desc: "School leadership" },
-  { icon: Lightbulb, label: "Innovator", desc: "AI & IoT builder" },
+interface Highlight {
+  id: string;
+  label: string;
+  description: string;
+  icon_name: string | null;
+  sort_order: number | null;
+}
+
+const fallbackHighlights: Highlight[] = [
+  { id: "1", label: "Class 10 CBSE", description: "PCM track ahead", icon_name: "GraduationCap", sort_order: 1 },
+  { id: "2", label: "B.Tech CSE", description: "Career goal", icon_name: "Target", sort_order: 2 },
+  { id: "3", label: "Head Boy", description: "School leadership", icon_name: "Crown", sort_order: 3 },
+  { id: "4", label: "Innovator", description: "AI & IoT builder", icon_name: "Lightbulb", sort_order: 4 },
 ];
+
+const getIcon = (name: string | null) => {
+  if (!name) return Star;
+  return (icons as Record<string, any>)[name] || Star;
+};
 
 const AboutSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [highlights, setHighlights] = useState<Highlight[]>(fallbackHighlights);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase.from("about_highlights").select("*").order("sort_order");
+      if (data && data.length > 0) setHighlights(data);
+    };
+    fetch();
+  }, []);
 
   return (
     <section id="about" className="section-padding" ref={ref}>
@@ -41,19 +63,22 @@ const AboutSection = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {highlights.map((item, i) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 0.2 + i * 0.1 }}
-                  className="bg-card border border-border rounded-lg p-5 text-center hover:border-primary/50 transition-colors group"
-                >
-                  <item.icon className="mx-auto mb-3 text-primary group-hover:text-glow transition-colors" size={28} />
-                  <h3 className="font-display text-sm font-semibold text-foreground mb-1">{item.label}</h3>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </motion.div>
-              ))}
+              {highlights.map((item, i) => {
+                const Icon = getIcon(item.icon_name);
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 0.2 + i * 0.1 }}
+                    className="bg-card border border-border rounded-lg p-5 text-center hover:border-primary/50 transition-colors group"
+                  >
+                    <Icon className="mx-auto mb-3 text-primary group-hover:text-glow transition-colors" size={28} />
+                    <h3 className="font-display text-sm font-semibold text-foreground mb-1">{item.label}</h3>
+                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </motion.div>
