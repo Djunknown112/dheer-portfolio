@@ -70,11 +70,18 @@ const SkillsSection = () => {
             <div>
               <h3 className="font-display text-sm tracking-wider text-primary uppercase mb-5">Technical</h3>
               <div className="space-y-3">
-                {technical.map((s, i) => {
-                  const Icon = getIcon(s.icon_name);
-                  return (
+                {technical.map((s, i) => (
                     <motion.div
                       key={s.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={isInView ? { opacity: 1, x: 0 } : {}}
+                      transition={{ delay: 0.1 * i }}
+                      className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
+                    >
+                      <DynamicIcon name={s.icon_name} className="text-primary shrink-0" size={22} />
+                      <span className="text-sm text-foreground font-body font-medium">{s.name}</span>
+                    </motion.div>
+                  ))}
                       initial={{ opacity: 0, x: -20 }}
                       animate={isInView ? { opacity: 1, x: 0 } : {}}
                       transition={{ delay: 0.1 * i }}
