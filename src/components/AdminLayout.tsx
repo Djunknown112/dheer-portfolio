@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard, FolderKanban, Trophy, FileText, ImageIcon,
-  Settings, LogOut, Menu, X
+  Settings, LogOut, Menu, X, Zap, MessageSquare
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -12,6 +12,8 @@ const links = [
   { to: "/admin/achievements", icon: Trophy, label: "Achievements" },
   { to: "/admin/documents", icon: FileText, label: "Documents" },
   { to: "/admin/photos", icon: ImageIcon, label: "Photos" },
+  { to: "/admin/skills", icon: Zap, label: "Skills" },
+  { to: "/admin/messages", icon: MessageSquare, label: "Messages" },
   { to: "/admin/content", icon: Settings, label: "Content" },
 ];
 
