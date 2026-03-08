@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
-import profileImg from "@/assets/profile-placeholder.png";
+import profileImg from "@/assets/profile-photo.jpg";
 
 const HeroSection = () => {
   return (
