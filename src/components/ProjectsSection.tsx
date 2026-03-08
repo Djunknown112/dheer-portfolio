@@ -10,7 +10,7 @@ const defaultProjects = [
     description: "A wildlife monitoring system designed to reduce human-wildlife conflict using sensors and communication systems.",
     features: ["GPS Tracking", "Pulse Monitoring", "Accelerometer Detection", "Solar-Powered", "GSM Communication"],
     technologies: ["Arduino", "GPS Module", "GSM Module", "Solar Panel", "Sensors"],
-    youtube_link: "https://www.youtube.com/@WildSentry",
+    youtube_link: "https://youtube.com/@wildsentry_original?si=jZrDHo06TsEX6nd_",
     color_from: "emerald-500/20", color_to: "cyan-500/20",
   },
   {
