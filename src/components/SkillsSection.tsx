@@ -1,7 +1,8 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import * as LucideIcons from "lucide-react";
+import { Cpu, type LucideProps } from "lucide-react";
+import dynamicIconImports from "lucide-react/dynamicIconImports";
 
 interface Skill {
   id: string;
@@ -11,10 +12,26 @@ interface Skill {
   sort_order: number | null;
 }
 
-const getIcon = (iconName: string | null) => {
-  if (!iconName) return LucideIcons.Cpu;
-  const icon = (LucideIcons as any)[iconName];
-  return icon || LucideIcons.Cpu;
+const iconCache: Record<string, React.ComponentType<LucideProps>> = {};
+
+const DynamicIcon = ({ name, ...props }: { name: string | null } & LucideProps) => {
+  if (!name) return <Cpu {...props} />;
+  
+  // Convert PascalCase to kebab-case for dynamicIconImports
+  const kebab = name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  
+  if (!(kebab in dynamicIconImports)) return <Cpu {...props} />;
+  
+  if (!iconCache[kebab]) {
+    iconCache[kebab] = lazy(dynamicIconImports[kebab as keyof typeof dynamicIconImports]);
+  }
+  const LazyIcon = iconCache[kebab];
+  
+  return (
+    <Suspense fallback={<Cpu {...props} />}>
+      <LazyIcon {...props} />
+    </Suspense>
+  );
 };
 
 const SkillsSection = () => {
