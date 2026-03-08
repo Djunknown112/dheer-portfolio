@@ -1,7 +1,8 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import * as LucideIcons from "lucide-react";
+import { Cpu, type LucideProps } from "lucide-react";
+import dynamicIconImports from "lucide-react/dynamicIconImports";
 
 interface Skill {
   id: string;
@@ -11,10 +12,21 @@ interface Skill {
   sort_order: number | null;
 }
 
-const getIcon = (iconName: string | null) => {
-  if (!iconName) return LucideIcons.Cpu;
-  const icon = (LucideIcons as any)[iconName];
-  return icon || LucideIcons.Cpu;
+const iconCache: Record<string, React.ComponentType<LucideProps>> = {};
+
+const DynamicIcon = ({ name, ...props }: { name: string | null } & LucideProps) => {
+  if (!name) return <Cpu {...props} />;
+  const kebab = name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  if (!(kebab in dynamicIconImports)) return <Cpu {...props} />;
+  if (!iconCache[kebab]) {
+    iconCache[kebab] = lazy(dynamicIconImports[kebab as keyof typeof dynamicIconImports]);
+  }
+  const LazyIcon = iconCache[kebab];
+  return (
+    <Suspense fallback={<Cpu {...props} />}>
+      <LazyIcon {...props} />
+    </Suspense>
+  );
 };
 
 const SkillsSection = () => {
@@ -53,42 +65,36 @@ const SkillsSection = () => {
             <div>
               <h3 className="font-display text-sm tracking-wider text-primary uppercase mb-5">Technical</h3>
               <div className="space-y-3">
-                {technical.map((s, i) => {
-                  const Icon = getIcon(s.icon_name);
-                  return (
-                    <motion.div
-                      key={s.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={isInView ? { opacity: 1, x: 0 } : {}}
-                      transition={{ delay: 0.1 * i }}
-                      className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
-                    >
-                      <Icon className="text-primary shrink-0" size={22} />
-                      <span className="text-sm text-foreground font-body font-medium">{s.name}</span>
-                    </motion.div>
-                  );
-                })}
+                {technical.map((s, i) => (
+                  <motion.div
+                    key={s.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={isInView ? { opacity: 1, x: 0 } : {}}
+                    transition={{ delay: 0.1 * i }}
+                    className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
+                  >
+                    <DynamicIcon name={s.icon_name} className="text-primary shrink-0" size={22} />
+                    <span className="text-sm text-foreground font-body font-medium">{s.name}</span>
+                  </motion.div>
+                ))}
               </div>
             </div>
 
             <div>
               <h3 className="font-display text-sm tracking-wider text-primary uppercase mb-5">Soft Skills</h3>
               <div className="space-y-3">
-                {soft.map((s, i) => {
-                  const Icon = getIcon(s.icon_name);
-                  return (
-                    <motion.div
-                      key={s.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={isInView ? { opacity: 1, x: 0 } : {}}
-                      transition={{ delay: 0.1 * i }}
-                      className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
-                    >
-                      <Icon className="text-primary shrink-0" size={22} />
-                      <span className="text-sm text-foreground font-body font-medium">{s.name}</span>
-                    </motion.div>
-                  );
-                })}
+                {soft.map((s, i) => (
+                  <motion.div
+                    key={s.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={isInView ? { opacity: 1, x: 0 } : {}}
+                    transition={{ delay: 0.1 * i }}
+                    className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
+                  >
+                    <DynamicIcon name={s.icon_name} className="text-primary shrink-0" size={22} />
+                    <span className="text-sm text-foreground font-body font-medium">{s.name}</span>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </div>
