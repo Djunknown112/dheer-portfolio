@@ -1,16 +1,42 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
-import { MapPin, Mail, Send } from "lucide-react";
+import { MapPin, Mail, Send, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const ContactSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Thank you for your message! Contact form will be fully functional once the backend is connected.");
-    setFormData({ name: "", email: "", message: "" });
+    setSending(true);
+
+    try {
+      // Save to database
+      const { error } = await supabase.from("contact_messages").insert({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      });
+
+      if (error) throw error;
+
+      // Trigger email notification
+      await supabase.functions.invoke("send-contact-email", {
+        body: { name: formData.name, email: formData.email, message: formData.message },
+      });
+
+      toast.success("Message sent successfully! I'll get back to you soon.");
+      setFormData({ name: "", email: "", message: "" });
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -39,7 +65,7 @@ const ContactSection = () => {
                 <Mail className="text-primary shrink-0 mt-1" size={20} />
                 <div>
                   <h3 className="font-display text-sm font-semibold text-foreground">Email</h3>
-                  <p className="text-sm text-muted-foreground font-body">dheer@example.com</p>
+                  <p className="text-sm text-muted-foreground font-body">dheerjoshi2606@gmail.com</p>
                 </div>
               </div>
             </div>
@@ -71,10 +97,11 @@ const ContactSection = () => {
               />
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-display text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity box-glow"
+                disabled={sending}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-display text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity box-glow disabled:opacity-50"
               >
-                <Send size={16} />
-                Send Message
+                {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                {sending ? "Sending..." : "Send Message"}
               </button>
             </form>
           </div>

@@ -1,25 +1,40 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { BrainCircuit, Wifi, Cpu, Bot, Smartphone, Crown, Puzzle, Lightbulb, Users } from "lucide-react";
+import { useRef, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import * as LucideIcons from "lucide-react";
 
-const technicalSkills = [
-  { icon: BrainCircuit, label: "Artificial Intelligence" },
-  { icon: Wifi, label: "Internet of Things" },
-  { icon: Cpu, label: "Embedded Systems" },
-  { icon: Bot, label: "Robotics" },
-  { icon: Smartphone, label: "Smart Devices" },
-];
+interface Skill {
+  id: string;
+  name: string;
+  category: string;
+  icon_name: string | null;
+  sort_order: number | null;
+}
 
-const softSkills = [
-  { icon: Crown, label: "Leadership" },
-  { icon: Puzzle, label: "Problem Solving" },
-  { icon: Lightbulb, label: "Innovation Thinking" },
-  { icon: Users, label: "Team Collaboration" },
-];
+const getIcon = (iconName: string | null) => {
+  if (!iconName) return LucideIcons.Cpu;
+  const icon = (LucideIcons as any)[iconName];
+  return icon || LucideIcons.Cpu;
+};
 
 const SkillsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [skills, setSkills] = useState<Skill[]>([]);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      const { data } = await supabase
+        .from("skills")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (data) setSkills(data);
+    };
+    fetchSkills();
+  }, []);
+
+  const technical = skills.filter(s => s.category === "Technical");
+  const soft = skills.filter(s => s.category === "Soft Skill");
 
   return (
     <section id="skills" className="section-padding bg-card/30" ref={ref}>
@@ -38,36 +53,42 @@ const SkillsSection = () => {
             <div>
               <h3 className="font-display text-sm tracking-wider text-primary uppercase mb-5">Technical</h3>
               <div className="space-y-3">
-                {technicalSkills.map((s, i) => (
-                  <motion.div
-                    key={s.label}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={isInView ? { opacity: 1, x: 0 } : {}}
-                    transition={{ delay: 0.1 * i }}
-                    className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
-                  >
-                    <s.icon className="text-primary shrink-0" size={22} />
-                    <span className="text-sm text-foreground font-body font-medium">{s.label}</span>
-                  </motion.div>
-                ))}
+                {technical.map((s, i) => {
+                  const Icon = getIcon(s.icon_name);
+                  return (
+                    <motion.div
+                      key={s.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={isInView ? { opacity: 1, x: 0 } : {}}
+                      transition={{ delay: 0.1 * i }}
+                      className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
+                    >
+                      <Icon className="text-primary shrink-0" size={22} />
+                      <span className="text-sm text-foreground font-body font-medium">{s.name}</span>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
 
             <div>
               <h3 className="font-display text-sm tracking-wider text-primary uppercase mb-5">Soft Skills</h3>
               <div className="space-y-3">
-                {softSkills.map((s, i) => (
-                  <motion.div
-                    key={s.label}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={isInView ? { opacity: 1, x: 0 } : {}}
-                    transition={{ delay: 0.1 * i }}
-                    className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
-                  >
-                    <s.icon className="text-primary shrink-0" size={22} />
-                    <span className="text-sm text-foreground font-body font-medium">{s.label}</span>
-                  </motion.div>
-                ))}
+                {soft.map((s, i) => {
+                  const Icon = getIcon(s.icon_name);
+                  return (
+                    <motion.div
+                      key={s.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={isInView ? { opacity: 1, x: 0 } : {}}
+                      transition={{ delay: 0.1 * i }}
+                      className="flex items-center gap-4 bg-card border border-border rounded-lg px-5 py-4 hover:border-primary/40 transition-colors"
+                    >
+                      <Icon className="text-primary shrink-0" size={22} />
+                      <span className="text-sm text-foreground font-body font-medium">{s.name}</span>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           </div>

@@ -15,6 +15,8 @@ import AdminAchievements from "./pages/AdminAchievements";
 import AdminDocuments from "./pages/AdminDocuments";
 import AdminPhotos from "./pages/AdminPhotos";
 import AdminContent from "./pages/AdminContent";
+import AdminSkills from "./pages/AdminSkills";
+import AdminMessages from "./pages/AdminMessages";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,8 @@ const App = () => (
               <Route path="documents" element={<AdminDocuments />} />
               <Route path="photos" element={<AdminPhotos />} />
               <Route path="content" element={<AdminContent />} />
+              <Route path="skills" element={<AdminSkills />} />
+              <Route path="messages" element={<AdminMessages />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
