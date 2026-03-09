@@ -74,15 +74,9 @@ const AboutSection = () => {
 
           <div className="grid lg:grid-cols-2 gap-10 items-start">
             <div className="space-y-5">
-              <p className="text-muted-foreground leading-relaxed font-body">
-                I'm <span className="text-foreground font-semibold">Dheer Joshi</span>, a driven and curious student currently in Class 10 (CBSE) from Vadodara, India. My passion lies at the intersection of technology and real-world problem solving.
-              </p>
-              <p className="text-muted-foreground leading-relaxed font-body">
-                With a strong foundation in Artificial Intelligence, IoT, and embedded systems, I've already built projects like <span className="text-primary">WildSentry</span> — a wildlife monitoring system — and <span className="text-primary">EV Armour</span>, a safety system for electric vehicles.
-              </p>
-              <p className="text-muted-foreground leading-relaxed font-body">
-                As the <span className="text-foreground font-semibold">Head Boy</span> of my school, I lead with responsibility and inspire others to think innovatively. My goal is to pursue <span className="text-primary">B.Tech in Computer Science Engineering</span> and contribute to technologies that make the world safer and smarter.
-              </p>
+              {paragraphs.map((p, i) => (
+                <p key={i} className="text-muted-foreground leading-relaxed font-body" dangerouslySetInnerHTML={{ __html: p }} />
+              ))}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
