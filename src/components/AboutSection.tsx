@@ -23,17 +23,40 @@ const getIcon = (name: string | null) => {
   return (icons as Record<string, any>)[name] || Star;
 };
 
+const fallbackParagraphs = [
+  'I\'m <span class="text-foreground font-semibold">Dheer Joshi</span>, a driven and curious student currently in Class 10 (CBSE) from Vadodara, India. My passion lies at the intersection of technology and real-world problem solving.',
+  'With a strong foundation in Artificial Intelligence, IoT, and embedded systems, I\'ve already built projects like <span class="text-primary">WildSentry</span> — a wildlife monitoring system — and <span class="text-primary">EV Armour</span>, a safety system for electric vehicles.',
+  'As the <span class="text-foreground font-semibold">Head Boy</span> of my school, I lead with responsibility and inspire others to think innovatively. My goal is to pursue <span class="text-primary">B.Tech in Computer Science Engineering</span> and contribute to technologies that make the world safer and smarter.',
+];
+
 const AboutSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [highlights, setHighlights] = useState<Highlight[]>(fallbackHighlights);
+  const [paragraphs, setParagraphs] = useState<string[]>(fallbackParagraphs);
 
   useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase.from("about_highlights").select("*").order("sort_order");
-      if (data && data.length > 0) setHighlights(data);
+    const fetchData = async () => {
+      const { data: hlData } = await supabase.from("about_highlights").select("*").order("sort_order");
+      if (hlData && hlData.length > 0) setHighlights(hlData);
+
+      const { data: contentData } = await supabase.from("site_content").select("*");
+      if (contentData) {
+        const map: Record<string, string> = {};
+        contentData.forEach(d => { map[d.key] = d.value; });
+        const p1 = map["about_paragraph_1"];
+        const p2 = map["about_paragraph_2"];
+        const p3 = map["about_paragraph_3"];
+        if (p1 || p2 || p3) {
+          setParagraphs([
+            p1 || fallbackParagraphs[0],
+            p2 || fallbackParagraphs[1],
+            p3 || fallbackParagraphs[2],
+          ]);
+        }
+      }
     };
-    fetch();
+    fetchData();
   }, []);
 
   return (
@@ -51,15 +74,9 @@ const AboutSection = () => {
 
           <div className="grid lg:grid-cols-2 gap-10 items-start">
             <div className="space-y-5">
-              <p className="text-muted-foreground leading-relaxed font-body">
-                I'm <span className="text-foreground font-semibold">Dheer Joshi</span>, a driven and curious student currently in Class 10 (CBSE) from Vadodara, India. My passion lies at the intersection of technology and real-world problem solving.
-              </p>
-              <p className="text-muted-foreground leading-relaxed font-body">
-                With a strong foundation in Artificial Intelligence, IoT, and embedded systems, I've already built projects like <span className="text-primary">WildSentry</span> — a wildlife monitoring system — and <span className="text-primary">EV Armour</span>, a safety system for electric vehicles.
-              </p>
-              <p className="text-muted-foreground leading-relaxed font-body">
-                As the <span className="text-foreground font-semibold">Head Boy</span> of my school, I lead with responsibility and inspire others to think innovatively. My goal is to pursue <span className="text-primary">B.Tech in Computer Science Engineering</span> and contribute to technologies that make the world safer and smarter.
-              </p>
+              {paragraphs.map((p, i) => (
+                <p key={i} className="text-muted-foreground leading-relaxed font-body" dangerouslySetInnerHTML={{ __html: p }} />
+              ))}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
