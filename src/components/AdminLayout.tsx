@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard, FolderKanban, Trophy, FileText, ImageIcon,
-  Settings, LogOut, Menu, X, Zap, MessageSquare, User, Palette
+  Settings, LogOut, Menu, X, Zap, MessageSquare, User, Palette, Star
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
