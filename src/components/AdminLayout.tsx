@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard, FolderKanban, Trophy, FileText, ImageIcon,
-  Settings, LogOut, Menu, X, Zap, MessageSquare, User
+  Settings, LogOut, Menu, X, Zap, MessageSquare, User, Palette
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -16,6 +16,7 @@ const links = [
   { to: "/admin/about-highlights", icon: User, label: "About Me" },
   { to: "/admin/messages", icon: MessageSquare, label: "Messages" },
   { to: "/admin/content", icon: Settings, label: "Content" },
+  { to: "/admin/appearance", icon: Palette, label: "Appearance" },
 ];
 
 const AdminLayout = () => {
