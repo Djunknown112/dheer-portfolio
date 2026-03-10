@@ -8,6 +8,7 @@ import SkillsSection from "@/components/SkillsSection";
 import DocumentsSection from "@/components/DocumentsSection";
 import GallerySection from "@/components/GallerySection";
 import ContactSection from "@/components/ContactSection";
+import ReviewsSection from "@/components/ReviewsSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
