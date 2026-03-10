@@ -19,6 +19,7 @@ import AdminSkills from "./pages/AdminSkills";
 import AdminMessages from "./pages/AdminMessages";
 import AdminAboutHighlights from "./pages/AdminAboutHighlights";
 import AdminAppearance from "./pages/AdminAppearance";
+import AdminReviews from "./pages/AdminReviews";
 
 const queryClient = new QueryClient();
 
