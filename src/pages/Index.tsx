@@ -11,6 +11,7 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
+  useThemeLoader();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />

@@ -1,9 +1,29 @@
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
-import profileImg from "@/assets/profile-photo.jpg";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import heroBgDefault from "@/assets/hero-bg.jpg";
+import profileImgDefault from "@/assets/profile-photo.jpg";
 
 const HeroSection = () => {
+  const [profileImg, setProfileImg] = useState(profileImgDefault);
+  const [heroBg, setHeroBg] = useState(heroBgDefault);
+  const [subtitle, setSubtitle] = useState("Young Innovator & Tech Builder");
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      const { data } = await supabase.from("site_content").select("*");
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach(d => { map[d.key] = d.value; });
+        if (map["profile_photo_url"]) setProfileImg(map["profile_photo_url"]);
+        if (map["hero_bg_url"]) setHeroBg(map["hero_bg_url"]);
+        if (map["hero_subtitle"]) setSubtitle(map["hero_subtitle"]);
+      }
+    };
+    fetchContent();
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
@@ -40,7 +60,7 @@ const HeroSection = () => {
         >
           Dheer Joshi
           <span className="block text-primary text-glow text-xl sm:text-2xl lg:text-3xl mt-2 font-medium">
-            Young Innovator & Tech Builder
+            {subtitle}
           </span>
         </motion.h1>
 
