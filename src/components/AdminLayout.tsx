@@ -15,6 +15,7 @@ const links = [
   { to: "/admin/skills", icon: Zap, label: "Skills" },
   { to: "/admin/about-highlights", icon: User, label: "About Me" },
   { to: "/admin/messages", icon: MessageSquare, label: "Messages" },
+  { to: "/admin/reviews", icon: Star, label: "Reviews" },
   { to: "/admin/content", icon: Settings, label: "Content" },
   { to: "/admin/appearance", icon: Palette, label: "Appearance" },
 ];

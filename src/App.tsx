@@ -45,6 +45,7 @@ const App = () => (
               <Route path="messages" element={<AdminMessages />} />
               <Route path="about-highlights" element={<AdminAboutHighlights />} />
               <Route path="appearance" element={<AdminAppearance />} />
+              <Route path="reviews" element={<AdminReviews />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
