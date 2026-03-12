@@ -12,7 +12,12 @@ import ReviewsSection from "@/components/ReviewsSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
-  useThemeLoader();
+  const themeLoaded = useThemeLoader();
+
+  if (!themeLoaded) {
+    return <div className="min-h-screen bg-[hsl(220,20%,7%)]" />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />

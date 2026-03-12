@@ -1,5 +1,5 @@
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { X, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,12 +12,14 @@ const GallerySection = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchPhotos = async () => {
       const { data } = await supabase.from("photos").select("*").order("sort_order");
       if (data) setPhotos(data);
     };
-    fetch();
+    fetchPhotos();
   }, []);
+
+  const closeLightbox = useCallback(() => setSelectedPhoto(null), []);
 
   const hasPhotos = photos.length > 0;
 
@@ -33,20 +35,23 @@ const GallerySection = () => {
           {hasPhotos ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {photos.map((photo, i) => (
-                <motion.div
+                <div
                   key={photo.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ delay: Math.min(0.08 * i, 0.5) }}
                   onClick={() => setSelectedPhoto(photo)}
-                  className="aspect-square rounded-xl overflow-hidden cursor-pointer border border-border hover:border-primary/40 hover:box-glow transition-all group relative"
+                  className="aspect-square rounded-xl overflow-hidden cursor-pointer border border-border hover:border-primary/40 hover:box-glow transition-all group relative will-change-transform"
                 >
-                  <img src={photo.image_url} alt={photo.caption} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img
+                    src={photo.image_url}
+                    alt={photo.caption}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-3">
                     <p className="text-xs text-foreground truncate">{photo.caption}</p>
                     <span className="text-[10px] text-primary/60">{photo.category}</span>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           ) : (
@@ -69,10 +74,10 @@ const GallerySection = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setSelectedPhoto(null)}
+            onClick={closeLightbox}
             className="fixed inset-0 z-50 bg-background/90 backdrop-blur-sm flex items-center justify-center p-4"
           >
-            <button onClick={() => setSelectedPhoto(null)} className="absolute top-6 right-6 text-foreground hover:text-primary">
+            <button onClick={closeLightbox} className="absolute top-6 right-6 text-foreground hover:text-primary">
               <X size={28} />
             </button>
             <img src={selectedPhoto.image_url} alt={selectedPhoto.caption} className="max-w-full max-h-[80vh] rounded-xl object-contain" />
