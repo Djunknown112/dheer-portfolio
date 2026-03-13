@@ -1,0 +1,1 @@
+CREATE POLICY "Auth update reviews" ON public.reviews FOR UPDATE TO authenticated USING (true);

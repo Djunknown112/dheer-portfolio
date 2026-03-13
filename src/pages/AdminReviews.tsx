@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Star } from "lucide-react";
+import { Trash2, Star, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Review {
@@ -10,6 +10,7 @@ interface Review {
   rating: number;
   message: string;
   created_at: string;
+  hidden: boolean;
 }
 
 const AdminReviews = () => {
