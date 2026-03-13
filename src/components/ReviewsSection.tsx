@@ -31,6 +31,7 @@ const ReviewsSection = () => {
     const { data } = await supabase
       .from("reviews")
       .select("*")
+      .eq("hidden", false)
       .order("created_at", { ascending: false });
     if (data) setReviews(data);
   };
