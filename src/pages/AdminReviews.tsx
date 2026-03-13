@@ -72,7 +72,7 @@ const AdminReviews = () => {
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="bg-card border border-border rounded-xl p-4 flex items-start justify-between gap-4"
+              className={`bg-card border border-border rounded-xl p-4 flex items-start justify-between gap-4 ${review.hidden ? "opacity-50" : ""}`}
             >
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-3">
