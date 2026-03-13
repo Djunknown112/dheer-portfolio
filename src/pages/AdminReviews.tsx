@@ -42,6 +42,21 @@ const AdminReviews = () => {
     }
   };
 
+  const handleToggleHidden = async (id: string, currentHidden: boolean) => {
+    const { error } = await supabase
+      .from("reviews")
+      .update({ hidden: !currentHidden } as any)
+      .eq("id", id);
+    if (error) {
+      toast({ title: "Failed to update review", variant: "destructive" });
+    } else {
+      toast({ title: currentHidden ? "Review is now visible" : "Review hidden" });
+      setReviews((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, hidden: !currentHidden } : r))
+      );
+    }
+  };
+
   if (loading) {
     return <div className="text-muted-foreground animate-pulse">Loading reviews...</div>;
   }
