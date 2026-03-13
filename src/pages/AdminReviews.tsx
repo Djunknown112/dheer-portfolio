@@ -101,13 +101,22 @@ const AdminReviews = () => {
                   })}
                 </p>
               </div>
-              <button
-                onClick={() => handleDelete(review.id)}
-                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                title="Delete review"
-              >
-                <Trash2 size={18} />
-              </button>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => handleToggleHidden(review.id, review.hidden)}
+                  className={`p-2 rounded-lg transition-colors ${review.hidden ? "text-muted-foreground hover:bg-muted" : "text-primary hover:bg-primary/10"}`}
+                  title={review.hidden ? "Unhide review" : "Hide review"}
+                >
+                  {review.hidden ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                <button
+                  onClick={() => handleDelete(review.id)}
+                  className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                  title="Delete review"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
