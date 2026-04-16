@@ -2,13 +2,12 @@ import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import heroBgDefault from "@/assets/hero-bg.jpg";
-import profileImgDefault from "@/assets/profile-photo.jpg";
 
 const HeroSection = () => {
-  const [profileImg, setProfileImg] = useState(profileImgDefault);
-  const [heroBg, setHeroBg] = useState(heroBgDefault);
+  const [profileImg, setProfileImg] = useState<string | null>(null);
+  const [heroBg, setHeroBg] = useState<string | null>(null);
   const [subtitle, setSubtitle] = useState("Young Innovator & Tech Builder");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -20,6 +19,7 @@ const HeroSection = () => {
         if (map["hero_bg_url"]) setHeroBg(map["hero_bg_url"]);
         if (map["hero_subtitle"]) setSubtitle(map["hero_subtitle"]);
       }
+      setLoaded(true);
     };
     fetchContent();
   }, []);
@@ -28,7 +28,8 @@ const HeroSection = () => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-40" />
+        {heroBg && <img src={heroBg} alt="" className="w-full h-full object-cover opacity-40" />}
+        {!heroBg && !loaded && <div className="w-full h-full bg-background" />}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </div>
 
@@ -38,9 +39,13 @@ const HeroSection = () => {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, type: "spring" }}
-          className="mx-auto mb-8 w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-2 border-primary/50 box-glow"
+          className="mx-auto mb-8 w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-2 border-primary/50 box-glow bg-muted"
         >
-          <img src={profileImg} alt="Dheer Joshi" className="w-full h-full object-cover" />
+          {profileImg ? (
+            <img src={profileImg} alt="Dheer Joshi" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full animate-pulse bg-muted" />
+          )}
         </motion.div>
 
         <motion.p
