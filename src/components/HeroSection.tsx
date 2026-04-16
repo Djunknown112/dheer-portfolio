@@ -2,13 +2,12 @@ import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import heroBgDefault from "@/assets/hero-bg.jpg";
-import profileImgDefault from "@/assets/profile-photo.jpg";
 
 const HeroSection = () => {
-  const [profileImg, setProfileImg] = useState(profileImgDefault);
-  const [heroBg, setHeroBg] = useState(heroBgDefault);
+  const [profileImg, setProfileImg] = useState<string | null>(null);
+  const [heroBg, setHeroBg] = useState<string | null>(null);
   const [subtitle, setSubtitle] = useState("Young Innovator & Tech Builder");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -20,6 +19,7 @@ const HeroSection = () => {
         if (map["hero_bg_url"]) setHeroBg(map["hero_bg_url"]);
         if (map["hero_subtitle"]) setSubtitle(map["hero_subtitle"]);
       }
+      setLoaded(true);
     };
     fetchContent();
   }, []);
