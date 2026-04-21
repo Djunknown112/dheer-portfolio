@@ -1,15 +1,23 @@
+import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import { useThemeLoader } from "@/hooks/useTheme";
 import AboutSection from "@/components/AboutSection";
-import ProjectsSection from "@/components/ProjectsSection";
-import AchievementsSection from "@/components/AchievementsSection";
-import SkillsSection from "@/components/SkillsSection";
-import DocumentsSection from "@/components/DocumentsSection";
-import GallerySection from "@/components/GallerySection";
-import ContactSection from "@/components/ContactSection";
-import ReviewsSection from "@/components/ReviewsSection";
+import LazySection from "@/components/LazySection";
 import Footer from "@/components/Footer";
+
+// Code-split below-the-fold sections so they don't ship in the initial bundle
+const ProjectsSection = lazy(() => import("@/components/ProjectsSection"));
+const AchievementsSection = lazy(() => import("@/components/AchievementsSection"));
+const SkillsSection = lazy(() => import("@/components/SkillsSection"));
+const DocumentsSection = lazy(() => import("@/components/DocumentsSection"));
+const GallerySection = lazy(() => import("@/components/GallerySection"));
+const ContactSection = lazy(() => import("@/components/ContactSection"));
+const ReviewsSection = lazy(() => import("@/components/ReviewsSection"));
+
+const SectionFallback = ({ h = "400px" }: { h?: string }) => (
+  <div style={{ minHeight: h }} />
+);
 
 const Index = () => {
   const themeLoaded = useThemeLoader();
@@ -23,13 +31,49 @@ const Index = () => {
       <Navbar />
       <HeroSection />
       <AboutSection />
-      <ProjectsSection />
-      <AchievementsSection />
-      <SkillsSection />
-      <DocumentsSection />
-      <GallerySection />
-      <ContactSection />
-      <ReviewsSection />
+
+      <LazySection minHeight="600px">
+        <Suspense fallback={<SectionFallback h="600px" />}>
+          <ProjectsSection />
+        </Suspense>
+      </LazySection>
+
+      <LazySection minHeight="500px">
+        <Suspense fallback={<SectionFallback h="500px" />}>
+          <AchievementsSection />
+        </Suspense>
+      </LazySection>
+
+      <LazySection minHeight="500px">
+        <Suspense fallback={<SectionFallback h="500px" />}>
+          <SkillsSection />
+        </Suspense>
+      </LazySection>
+
+      <LazySection minHeight="400px">
+        <Suspense fallback={<SectionFallback h="400px" />}>
+          <DocumentsSection />
+        </Suspense>
+      </LazySection>
+
+      <LazySection minHeight="600px">
+        <Suspense fallback={<SectionFallback h="600px" />}>
+          <GallerySection />
+        </Suspense>
+      </LazySection>
+
+      <LazySection minHeight="500px">
+        <Suspense fallback={<SectionFallback h="500px" />}>
+          <ContactSection />
+        </Suspense>
+      </LazySection>
+
+      <LazySection minHeight="400px">
+        <Suspense fallback={<SectionFallback h="400px" />}>
+          <ReviewsSection />
+        </Suspense>
+      </LazySection>
+
       <Footer />
     </div>
   );
