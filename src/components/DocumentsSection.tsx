@@ -10,10 +10,13 @@ const defaultDocs = [
   { id: "4", title: "Project Documentation", category: "Projects", file_url: null },
 ];
 
+const PAGE_SIZE = 4;
+
 const DocumentsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [documents, setDocuments] = useState(defaultDocs);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     const fetch = async () => {
@@ -22,6 +25,9 @@ const DocumentsSection = () => {
     };
     fetch();
   }, []);
+
+  const visibleDocs = documents.slice(0, visibleCount);
+  const hasMore = visibleCount < documents.length;
 
   return (
     <section id="documents" className="section-padding" ref={ref}>
@@ -33,7 +39,7 @@ const DocumentsSection = () => {
           <div className="w-16 h-1 bg-primary mx-auto mb-10 rounded-full" />
 
           <div className="space-y-3">
-            {documents.map((doc, i) => (
+            {visibleDocs.map((doc, i) => (
               <motion.div
                 key={doc.id}
                 initial={{ opacity: 0, y: 15 }}
@@ -58,6 +64,17 @@ const DocumentsSection = () => {
               </motion.div>
             ))}
           </div>
+
+          {hasMore && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                className="px-6 py-2.5 text-xs font-display font-semibold text-primary border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors"
+              >
+                Load More ({documents.length - visibleCount} left)
+              </button>
+            </div>
+          )}
         </motion.div>
       </div>
     </section>

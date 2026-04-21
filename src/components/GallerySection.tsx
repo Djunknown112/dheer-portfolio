@@ -38,27 +38,39 @@ const GallerySection = () => {
           <div className="w-16 h-1 bg-primary mx-auto mb-10 rounded-full" />
 
           {hasPhotos ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {photos.map((photo, i) => (
-                <div
-                  key={photo.id}
-                  onClick={() => setSelectedPhoto(photo)}
-                  className="aspect-square rounded-xl overflow-hidden cursor-pointer border border-border hover:border-primary/40 hover:box-glow transition-all group relative will-change-transform"
-                >
-                  <img
-                    src={photo.image_url}
-                    alt={photo.caption}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-3">
-                    <p className="text-xs text-foreground truncate">{photo.caption}</p>
-                    <span className="text-[10px] text-primary/60">{photo.category}</span>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {visiblePhotos.map((photo) => (
+                  <div
+                    key={photo.id}
+                    onClick={() => setSelectedPhoto(photo)}
+                    className="aspect-square rounded-xl overflow-hidden cursor-pointer border border-border hover:border-primary/40 hover:box-glow transition-all group relative will-change-transform"
+                  >
+                    <img
+                      src={photo.image_url}
+                      alt={photo.caption}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-3">
+                      <p className="text-xs text-foreground truncate">{photo.caption}</p>
+                      <span className="text-[10px] text-primary/60">{photo.category}</span>
+                    </div>
                   </div>
+                ))}
+              </div>
+              {hasMore && (
+                <div className="flex justify-center mt-8">
+                  <button
+                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                    className="px-6 py-2.5 text-xs font-display font-semibold text-primary border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors"
+                  >
+                    Load More ({photos.length - visibleCount} left)
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[1,2,3,4,5,6].map(n => (
