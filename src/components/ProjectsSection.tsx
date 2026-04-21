@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { ExternalLink, ChevronRight, Cpu, Shield, BrainCircuit } from "lucide-react";
+import { ExternalLink, ChevronRight, Cpu, Shield, BrainCircuit, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const iconMap: Record<string, React.ComponentType<any>> = { Cpu, Shield, BrainCircuit };
@@ -103,11 +103,18 @@ const ProjectsSection = () => {
                     </div>
                     <p className="text-muted-foreground mb-6 font-body leading-relaxed">{project.description}</p>
 
-                    {project.youtube_link && (
-                      <a href={project.youtube_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline text-sm font-medium mb-6">
-                        <ExternalLink size={14} /> Watch on YouTube
-                      </a>
-                    )}
+                    <div className="flex flex-wrap gap-3 mb-6">
+                      {project.youtube_link && (
+                        <a href={project.youtube_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline text-sm font-medium">
+                          <ExternalLink size={14} /> Watch on YouTube
+                        </a>
+                      )}
+                      {(project as any).website_link && (
+                        <a href={(project as any).website_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-display font-semibold hover:opacity-90 transition-opacity">
+                          <Globe size={14} /> View Website
+                        </a>
+                      )}
+                    </div>
 
                     <div className="mb-6">
                       <h4 className="font-display text-xs tracking-wider text-primary uppercase mb-3">Technologies</h4>

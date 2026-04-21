@@ -210,6 +210,7 @@ export type Database = {
           technologies: string[] | null
           title: string
           updated_at: string
+          website_link: string | null
           youtube_link: string | null
         }
         Insert: {
@@ -225,6 +226,7 @@ export type Database = {
           technologies?: string[] | null
           title: string
           updated_at?: string
+          website_link?: string | null
           youtube_link?: string | null
         }
         Update: {
@@ -240,6 +242,7 @@ export type Database = {
           technologies?: string[] | null
           title?: string
           updated_at?: string
+          website_link?: string | null
           youtube_link?: string | null
         }
         Relationships: []

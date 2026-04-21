@@ -10,6 +10,7 @@ type Project = {
   features: string[];
   technologies: string[];
   youtube_link: string | null;
+  website_link: string | null;
   category: string | null;
   sort_order: number | null;
 };
@@ -19,7 +20,7 @@ const AdminProjects = () => {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
   const [form, setForm] = useState({
-    title: "", description: "", features: "", technologies: "", youtube_link: "", category: ""
+    title: "", description: "", features: "", technologies: "", youtube_link: "", website_link: "", category: ""
   });
 
   const fetchProjects = async () => {
@@ -31,7 +32,7 @@ const AdminProjects = () => {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ title: "", description: "", features: "", technologies: "", youtube_link: "", category: "" });
+    setForm({ title: "", description: "", features: "", technologies: "", youtube_link: "", website_link: "", category: "" });
     setShowForm(true);
   };
 
@@ -43,6 +44,7 @@ const AdminProjects = () => {
       features: (p.features || []).join(", "),
       technologies: (p.technologies || []).join(", "),
       youtube_link: p.youtube_link || "",
+      website_link: p.website_link || "",
       category: p.category || "",
     });
     setShowForm(true);
@@ -56,6 +58,7 @@ const AdminProjects = () => {
       features: form.features.split(",").map(s => s.trim()).filter(Boolean),
       technologies: form.technologies.split(",").map(s => s.trim()).filter(Boolean),
       youtube_link: form.youtube_link || null,
+      website_link: form.website_link || null,
       category: form.category || null,
     };
 
@@ -104,6 +107,7 @@ const AdminProjects = () => {
               <input placeholder="Features (comma separated)" value={form.features} onChange={e => setForm({...form, features: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" />
               <input placeholder="Technologies (comma separated)" value={form.technologies} onChange={e => setForm({...form, technologies: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" />
               <input placeholder="YouTube Link (optional)" value={form.youtube_link} onChange={e => setForm({...form, youtube_link: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" />
+              <input placeholder="Project Website Link (optional)" value={form.website_link} onChange={e => setForm({...form, website_link: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" />
               <input placeholder="Category" value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" />
               <button type="submit" className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-display font-semibold hover:opacity-90">
                 {editing ? "Update" : "Create"}
