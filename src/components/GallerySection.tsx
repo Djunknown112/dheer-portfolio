@@ -5,11 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Photo = { id: string; caption: string; category: string; image_url: string };
 
+const PAGE_SIZE = 6;
+
 const GallerySection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -22,6 +25,8 @@ const GallerySection = () => {
   const closeLightbox = useCallback(() => setSelectedPhoto(null), []);
 
   const hasPhotos = photos.length > 0;
+  const visiblePhotos = photos.slice(0, visibleCount);
+  const hasMore = visibleCount < photos.length;
 
   return (
     <section id="gallery" className="section-padding bg-card/30" ref={ref}>
