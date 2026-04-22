@@ -119,6 +119,16 @@ const ContactSection = () => {
                 required
                 className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary font-body"
               />
+              <input
+                type="tel"
+                placeholder="Your Contact Number (required)"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                required
+                inputMode="tel"
+                maxLength={20}
+                className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary font-body"
+              />
               <textarea
                 placeholder="Your Message"
                 value={formData.message}
