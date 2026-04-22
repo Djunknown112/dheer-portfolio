@@ -10,25 +10,36 @@ const OWNER_WHATSAPP = "917600338468"; // country code 91 + number
 const ContactSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" });
   const [sending, setSending] = useState(false);
   const [showChoice, setShowChoice] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) return;
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const phone = formData.phone.trim();
+    const message = formData.message.trim();
+
+    if (!name || !email || !phone || !message) {
+      toast.error("Please fill in all fields, including your contact number.");
+      return;
+    }
+    const phoneDigits = phone.replace(/[\s\-()]/g, "");
+    if (!/^\+?\d{7,15}$/.test(phoneDigits)) {
+      toast.error("Please enter a valid contact number (7–15 digits).");
+      return;
+    }
+
     setSending(true);
-
     try {
-      // Save to database (admin panel record)
       const { error } = await supabase.from("contact_messages").insert({
-        name: formData.name,
-        email: formData.email,
-        message: formData.message,
-      });
+        name,
+        email,
+        phone,
+        message,
+      } as any);
       if (error) throw error;
-
-      // Open the choice popup for delivery
       setShowChoice(true);
     } catch (err: any) {
       console.error(err);
@@ -39,7 +50,7 @@ const ContactSection = () => {
   };
 
   const buildBodyText = () =>
-    `Hi Dheer,\n\nMy name is ${formData.name}.\nEmail: ${formData.email}\n\n${formData.message}`;
+    `Hi Dheer,\n\nMy name is ${formData.name}.\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\n${formData.message}`;
 
   const sendViaEmail = () => {
     const subject = encodeURIComponent(`Portfolio contact from ${formData.name}`);
@@ -57,7 +68,7 @@ const ContactSection = () => {
   const finalize = () => {
     toast.success("Message ready! Just press Send in the app that opened.");
     setShowChoice(false);
-    setFormData({ name: "", email: "", message: "" });
+    setFormData({ name: "", email: "", phone: "", message: "" });
   };
 
   return (
@@ -106,6 +117,16 @@ const ContactSection = () => {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary font-body"
+              />
+              <input
+                type="tel"
+                placeholder="Your Contact Number (required)"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                required
+                inputMode="tel"
+                maxLength={20}
                 className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary font-body"
               />
               <textarea

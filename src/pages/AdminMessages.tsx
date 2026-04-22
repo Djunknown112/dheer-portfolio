@@ -7,6 +7,7 @@ interface Message {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   message: string;
   created_at: string;
 }
@@ -54,6 +55,11 @@ const AdminMessages = () => {
                   <a href={`mailto:${msg.email}`} className="text-xs text-primary hover:underline flex items-center gap-1">
                     <Mail size={12} /> {msg.email}
                   </a>
+                  {msg.phone && (
+                    <a href={`tel:${msg.phone}`} className="text-xs text-primary hover:underline block mt-0.5">
+                      📞 {msg.phone}
+                    </a>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground">
