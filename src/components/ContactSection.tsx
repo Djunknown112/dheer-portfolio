@@ -128,6 +128,56 @@ const ContactSection = () => {
           </div>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showChoice && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+            onClick={() => setShowChoice(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-card border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            >
+              <button
+                onClick={() => setShowChoice(false)}
+                className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+              <h3 className="font-display text-lg font-bold text-foreground mb-1">
+                How would you like to send it?
+              </h3>
+              <p className="text-sm text-muted-foreground font-body mb-5">
+                Your message is saved. Pick an app to deliver it — it will open prefilled, just press Send.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={sendViaEmail}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground font-display text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  <Mail size={16} />
+                  Send via Email
+                </button>
+                <button
+                  onClick={sendViaWhatsApp}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#25D366] text-white font-display text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  <MessageCircle size={16} />
+                  Send via WhatsApp
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
