@@ -91,6 +91,7 @@ const AdminAppearance = () => {
       theme_primary_h: primaryH,
       theme_primary_s: primaryS,
       theme_primary_l: primaryL,
+      theme_background: background,
     };
     if (profileUrl) entries["profile_photo_url"] = profileUrl;
     if (heroUrl) entries["hero_bg_url"] = heroUrl;
