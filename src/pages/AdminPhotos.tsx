@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { SortableList } from "@/components/admin/SortableList";
 
 type Photo = { id: string; caption: string; category: string; image_url: string };
 
@@ -82,24 +83,36 @@ const AdminPhotos = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {photos.length === 0 && <p className="text-sm text-muted-foreground col-span-full">No photos yet.</p>}
-        {photos.map((p) => (
-          <div key={p.id} className="relative group rounded-xl overflow-hidden border border-border">
-            <img src={p.image_url} alt={p.caption} className="w-full aspect-square object-cover" />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-3">
-              <p className="text-xs text-foreground truncate">{p.caption}</p>
-              <p className="text-[10px] text-muted-foreground">{p.category}</p>
-            </div>
-            <button
-              onClick={() => handleDelete(p.id)}
-              className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        ))}
-      </div>
+      {photos.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No photos yet.</p>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">Hover a photo and drag the handle to reorder.</p>
+          <SortableList
+            items={photos}
+            setItems={setPhotos}
+            table="photos"
+            layout="grid"
+            gridClassName="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          >
+            {(p) => (
+              <div className="relative group rounded-xl overflow-hidden border border-border">
+                <img src={p.image_url} alt={p.caption} className="w-full aspect-square object-cover" />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-3">
+                  <p className="text-xs text-foreground truncate">{p.caption}</p>
+                  <p className="text-[10px] text-muted-foreground">{p.category}</p>
+                </div>
+                <button
+                  onClick={() => handleDelete(p.id)}
+                  className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )}
+          </SortableList>
+        </>
+      )}
     </div>
   );
 };

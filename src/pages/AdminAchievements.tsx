@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { SortableList } from "@/components/admin/SortableList";
 
 type Achievement = {
   id: string;
@@ -95,24 +96,30 @@ const AdminAchievements = () => {
         </div>
       )}
 
-      <div className="space-y-3">
-        {items.length === 0 && <p className="text-sm text-muted-foreground">No achievements yet.</p>}
-        {items.map((a) => (
-          <div key={a.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {a.photo_url && <img src={a.photo_url} alt={a.title} className="w-10 h-10 rounded-lg object-cover" />}
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">{a.title}</h3>
-                <p className="text-xs text-muted-foreground">{a.date}</p>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No achievements yet.</p>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">Drag the handle on the left to reorder.</p>
+          <SortableList items={items} setItems={setItems} table="achievements">
+            {(a) => (
+              <div className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {a.photo_url && <img src={a.photo_url} alt={a.title} className="w-10 h-10 rounded-lg object-cover" />}
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">{a.title}</h3>
+                    <p className="text-xs text-muted-foreground">{a.date}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => openEdit(a)} className="p-2 text-muted-foreground hover:text-primary"><Pencil size={16} /></button>
+                  <button onClick={() => handleDelete(a.id)} className="p-2 text-muted-foreground hover:text-destructive"><Trash2 size={16} /></button>
+                </div>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => openEdit(a)} className="p-2 text-muted-foreground hover:text-primary"><Pencil size={16} /></button>
-              <button onClick={() => handleDelete(a.id)} className="p-2 text-muted-foreground hover:text-destructive"><Trash2 size={16} /></button>
-            </div>
-          </div>
-        ))}
-      </div>
+            )}
+          </SortableList>
+        </>
+      )}
     </div>
   );
 };
