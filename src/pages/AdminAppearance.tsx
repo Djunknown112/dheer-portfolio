@@ -21,6 +21,7 @@ const AdminAppearance = () => {
   const [primaryH, setPrimaryH] = useState("185");
   const [primaryS, setPrimaryS] = useState("80");
   const [primaryL, setPrimaryL] = useState("55");
+  const [background, setBackground] = useState<BackgroundTheme>("dark");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -35,6 +36,9 @@ const AdminAppearance = () => {
         if (map["theme_primary_h"]) setPrimaryH(map["theme_primary_h"]);
         if (map["theme_primary_s"]) setPrimaryS(map["theme_primary_s"]);
         if (map["theme_primary_l"]) setPrimaryL(map["theme_primary_l"]);
+        if (map["theme_background"] && map["theme_background"] in backgroundThemes) {
+          setBackground(map["theme_background"] as BackgroundTheme);
+        }
       }
     };
     fetchContent();
