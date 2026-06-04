@@ -2,17 +2,17 @@ import { useEffect, useRef, useState, ReactNode } from "react";
 
 interface LazySectionProps {
   children: ReactNode;
-  /** Approx min height to reserve so layout doesn't jump */
   minHeight?: string;
-  /** Distance before viewport to begin loading */
   rootMargin?: string;
+  id?: string;
 }
 
 /**
- * Defers mounting of its children until it is close to entering the viewport.
- * Drastically reduces initial JS execution and Supabase requests on first paint.
+ * Defers mounting of its children until close to entering the viewport.
+ * Accepts an `id` so anchor links (e.g. #projects) can scroll to the placeholder
+ * even before the lazy children mount — preventing "broken" nav links on mobile.
  */
-const LazySection = ({ children, minHeight = "400px", rootMargin = "300px" }: LazySectionProps) => {
+const LazySection = ({ children, minHeight = "400px", rootMargin = "300px", id }: LazySectionProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -32,7 +32,7 @@ const LazySection = ({ children, minHeight = "400px", rootMargin = "300px" }: La
   }, [visible, rootMargin]);
 
   return (
-    <div ref={ref} style={!visible ? { minHeight } : undefined}>
+    <div id={id} ref={ref} style={!visible ? { minHeight } : undefined}>
       {visible ? children : null}
     </div>
   );

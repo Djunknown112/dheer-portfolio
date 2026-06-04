@@ -32,43 +32,43 @@ const Index = () => {
       <HeroSection />
       <AboutSection />
 
-      <LazySection minHeight="600px">
+      <LazySection id="projects" minHeight="600px">
         <Suspense fallback={<SectionFallback h="600px" />}>
           <ProjectsSection />
         </Suspense>
       </LazySection>
 
-      <LazySection minHeight="500px">
+      <LazySection id="achievements" minHeight="500px">
         <Suspense fallback={<SectionFallback h="500px" />}>
           <AchievementsSection />
         </Suspense>
       </LazySection>
 
-      <LazySection minHeight="500px">
+      <LazySection id="skills" minHeight="500px">
         <Suspense fallback={<SectionFallback h="500px" />}>
           <SkillsSection />
         </Suspense>
       </LazySection>
 
-      <LazySection minHeight="400px">
+      <LazySection id="documents" minHeight="400px">
         <Suspense fallback={<SectionFallback h="400px" />}>
           <DocumentsSection />
         </Suspense>
       </LazySection>
 
-      <LazySection minHeight="600px">
+      <LazySection id="gallery" minHeight="600px">
         <Suspense fallback={<SectionFallback h="600px" />}>
           <GallerySection />
         </Suspense>
       </LazySection>
 
-      <LazySection minHeight="500px">
+      <LazySection id="contact" minHeight="500px">
         <Suspense fallback={<SectionFallback h="500px" />}>
           <ContactSection />
         </Suspense>
       </LazySection>
 
-      <LazySection minHeight="400px">
+      <LazySection id="reviews" minHeight="400px">
         <Suspense fallback={<SectionFallback h="400px" />}>
           <ReviewsSection />
         </Suspense>
