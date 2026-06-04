@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { SortableList } from "@/components/admin/SortableList";
 
 type Project = {
   id: string;
@@ -118,21 +119,27 @@ const AdminProjects = () => {
       )}
 
       {/* Project list */}
-      <div className="space-y-3">
-        {projects.length === 0 && <p className="text-sm text-muted-foreground">No projects yet. Add your first one!</p>}
-        {projects.map((p) => (
-          <div key={p.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">{p.title}</h3>
-              <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => openEdit(p)} className="p-2 text-muted-foreground hover:text-primary"><Pencil size={16} /></button>
-              <button onClick={() => handleDelete(p.id)} className="p-2 text-muted-foreground hover:text-destructive"><Trash2 size={16} /></button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {projects.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No projects yet. Add your first one!</p>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">Drag the handle on the left to reorder. Top item appears first on the site.</p>
+          <SortableList items={projects} setItems={setProjects} table="projects">
+            {(p) => (
+              <div className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">{p.title}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => openEdit(p)} className="p-2 text-muted-foreground hover:text-primary"><Pencil size={16} /></button>
+                  <button onClick={() => handleDelete(p.id)} className="p-2 text-muted-foreground hover:text-destructive"><Trash2 size={16} /></button>
+                </div>
+              </div>
+            )}
+          </SortableList>
+        </>
+      )}
     </div>
   );
 };
