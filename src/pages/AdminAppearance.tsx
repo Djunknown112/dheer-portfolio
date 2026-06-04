@@ -152,8 +152,39 @@ const AdminAppearance = () => {
         </div>
       </div>
 
+      {/* Background Theme */}
+      <div className="bg-card border border-border rounded-lg p-5 space-y-4 max-w-3xl">
+        <h2 className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
+          <Monitor size={16} className="text-primary" /> Background Theme
+        </h2>
+        <p className="text-xs text-muted-foreground">Pick the base background of the website. Save to apply on the live site.</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {(Object.keys(backgroundThemes) as BackgroundTheme[]).map((key) => {
+            const t = backgroundThemes[key];
+            const bgHsl = t.vars["--background"];
+            const fgHsl = t.vars["--foreground"];
+            const cardHsl = t.vars["--card"];
+            const isActive = background === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setBackground(key)}
+                className={`text-left rounded-xl border-2 overflow-hidden transition-all ${isActive ? "border-primary scale-[1.02]" : "border-border hover:border-muted-foreground"}`}
+              >
+                <div style={{ backgroundColor: `hsl(${bgHsl})` }} className="p-3 space-y-2">
+                  <div style={{ backgroundColor: `hsl(${cardHsl})` }} className="h-8 rounded" />
+                  <div style={{ color: `hsl(${fgHsl})` }} className="text-xs font-semibold">{t.label}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Theme Colors */}
       <div className="bg-card border border-border rounded-lg p-5 space-y-5 max-w-3xl">
+
         <h2 className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
           <Palette size={16} className="text-primary" /> Theme Color
         </h2>
