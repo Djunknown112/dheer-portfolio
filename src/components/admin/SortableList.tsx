@@ -101,7 +101,7 @@ function SortableItem({ id, children, layout }: { id: string; children: ReactNod
         <button
           {...attributes}
           {...listeners}
-          className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur p-1.5 rounded-lg text-foreground cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity touch-none"
+          className="absolute top-2 left-2 z-20 bg-background/90 backdrop-blur p-1.5 rounded-lg text-foreground cursor-grab active:cursor-grabbing touch-none border border-border shadow-md"
           aria-label="Drag to reorder"
           type="button"
         >
