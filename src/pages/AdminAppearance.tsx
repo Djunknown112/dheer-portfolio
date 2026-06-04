@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Save, Upload, Palette } from "lucide-react";
+import { Save, Upload, Palette, Monitor } from "lucide-react";
 import { toast } from "sonner";
+import { backgroundThemes, type BackgroundTheme } from "@/hooks/useTheme";
 
 const colorPresets = [
   { name: "Cyan (Default)", h: "185", s: "80", l: "55" },
