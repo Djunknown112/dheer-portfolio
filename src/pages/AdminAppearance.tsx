@@ -1,27 +1,75 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Save, Upload, Palette, Monitor } from "lucide-react";
+import { Save, Upload, Palette } from "lucide-react";
 import { toast } from "sonner";
-import { backgroundThemes, type BackgroundTheme } from "@/hooks/useTheme";
+import { themePresets, applyTheme, type ThemePreset } from "@/hooks/useTheme";
 
-const colorPresets = [
-  { name: "Cyan (Default)", h: "185", s: "80", l: "55" },
-  { name: "Electric Blue", h: "220", s: "90", l: "55" },
-  { name: "Purple", h: "270", s: "80", l: "60" },
-  { name: "Green", h: "150", s: "70", l: "50" },
-  { name: "Orange", h: "30", s: "90", l: "55" },
-  { name: "Rose", h: "340", s: "80", l: "55" },
-  { name: "Gold", h: "45", s: "90", l: "50" },
-  { name: "Teal", h: "170", s: "70", l: "45" },
-];
+type Triple = [string, string, string];
+
+const ColorEditor = ({
+  label,
+  description,
+  value,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  value: Triple;
+  onChange: (v: Triple) => void;
+}) => {
+  const [h, s, l] = value;
+  const color = `hsl(${h}, ${s}%, ${l}%)`;
+  return (
+    <div className="flex gap-4 items-start">
+      <div
+        className="w-20 h-20 rounded-xl border border-border shrink-0"
+        style={{ backgroundColor: color }}
+      />
+      <div className="flex-1 space-y-2">
+        <div>
+          <div className="text-sm font-display font-semibold text-foreground">{label}</div>
+          <div className="text-xs text-muted-foreground">{description}</div>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Hue</span>
+            <input
+              type="number" min={0} max={360}
+              value={h}
+              onChange={(e) => onChange([e.target.value, s, l])}
+              className="px-2 py-1.5 rounded bg-background border border-border text-xs text-foreground"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Sat %</span>
+            <input
+              type="number" min={0} max={100}
+              value={s}
+              onChange={(e) => onChange([h, e.target.value, l])}
+              className="px-2 py-1.5 rounded bg-background border border-border text-xs text-foreground"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Light %</span>
+            <input
+              type="number" min={0} max={100}
+              value={l}
+              onChange={(e) => onChange([h, s, e.target.value])}
+              className="px-2 py-1.5 rounded bg-background border border-border text-xs text-foreground"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AdminAppearance = () => {
   const [profileUrl, setProfileUrl] = useState("");
   const [heroUrl, setHeroUrl] = useState("");
-  const [primaryH, setPrimaryH] = useState("185");
-  const [primaryS, setPrimaryS] = useState("80");
-  const [primaryL, setPrimaryL] = useState("55");
-  const [background, setBackground] = useState<BackgroundTheme>("dark");
+  const [primary, setPrimary] = useState<Triple>(["185", "80", "55"]);
+  const [secondary, setSecondary] = useState<Triple>(["220", "15", "15"]);
+  const [background, setBackground] = useState<Triple>(["220", "20", "7"]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -33,12 +81,21 @@ const AdminAppearance = () => {
         data.forEach(d => { map[d.key] = d.value; });
         if (map["profile_photo_url"]) setProfileUrl(map["profile_photo_url"]);
         if (map["hero_bg_url"]) setHeroUrl(map["hero_bg_url"]);
-        if (map["theme_primary_h"]) setPrimaryH(map["theme_primary_h"]);
-        if (map["theme_primary_s"]) setPrimaryS(map["theme_primary_s"]);
-        if (map["theme_primary_l"]) setPrimaryL(map["theme_primary_l"]);
-        if (map["theme_background"] && map["theme_background"] in backgroundThemes) {
-          setBackground(map["theme_background"] as BackgroundTheme);
-        }
+        setPrimary([
+          map["theme_primary_h"] ?? "185",
+          map["theme_primary_s"] ?? "80",
+          map["theme_primary_l"] ?? "55",
+        ]);
+        setSecondary([
+          map["theme_secondary_h"] ?? "220",
+          map["theme_secondary_s"] ?? "15",
+          map["theme_secondary_l"] ?? "15",
+        ]);
+        setBackground([
+          map["theme_background_h"] ?? "220",
+          map["theme_background_s"] ?? "20",
+          map["theme_background_l"] ?? "7",
+        ]);
       }
     };
     fetchContent();
@@ -79,19 +136,23 @@ const AdminAppearance = () => {
     setUploading(false);
   };
 
-  const applyPreset = (preset: typeof colorPresets[0]) => {
-    setPrimaryH(preset.h);
-    setPrimaryS(preset.s);
-    setPrimaryL(preset.l);
+  const applyPreset = (preset: ThemePreset) => {
+    setPrimary(preset.primary);
+    setSecondary(preset.secondary);
+    setBackground(preset.background);
+  };
+
+  const handlePreview = () => {
+    applyTheme(primary, secondary, background);
+    toast.success("Preview applied locally — Save to keep");
   };
 
   const handleSave = async () => {
     setSaving(true);
     const entries: Record<string, string> = {
-      theme_primary_h: primaryH,
-      theme_primary_s: primaryS,
-      theme_primary_l: primaryL,
-      theme_background: background,
+      theme_primary_h: primary[0], theme_primary_s: primary[1], theme_primary_l: primary[2],
+      theme_secondary_h: secondary[0], theme_secondary_s: secondary[1], theme_secondary_l: secondary[2],
+      theme_background_h: background[0], theme_background_s: background[1], theme_background_l: background[2],
     };
     if (profileUrl) entries["profile_photo_url"] = profileUrl;
     if (heroUrl) entries["hero_bg_url"] = heroUrl;
@@ -104,19 +165,23 @@ const AdminAppearance = () => {
         await supabase.from("site_content").insert({ key, value });
       }
     }
-    toast.success("Appearance saved! Changes will reflect on the live site.");
+    applyTheme(primary, secondary, background);
+    toast.success("Appearance saved!");
     setSaving(false);
   };
 
-  const previewColor = `hsl(${primaryH}, ${primaryS}%, ${primaryL}%)`;
-
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="font-display text-xl font-bold text-foreground">Appearance</h1>
-        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-display font-semibold hover:opacity-90 disabled:opacity-50">
-          <Save size={14} /> {saving ? "Saving..." : "Save All"}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={handlePreview} className="px-4 py-2 rounded-lg text-xs font-display font-semibold border border-border hover:bg-secondary">
+            Preview
+          </button>
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-display font-semibold hover:opacity-90 disabled:opacity-50">
+            <Save size={14} /> {saving ? "Saving..." : "Save All"}
+          </button>
+        </div>
       </div>
 
       {/* Profile & Hero Photos */}
@@ -152,90 +217,83 @@ const AdminAppearance = () => {
         </div>
       </div>
 
-      {/* Background Theme */}
+      {/* Quick Presets */}
       <div className="bg-card border border-border rounded-lg p-5 space-y-4 max-w-3xl">
         <h2 className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
-          <Monitor size={16} className="text-primary" /> Background Theme
+          <Palette size={16} className="text-primary" /> Color Theme
         </h2>
-        <p className="text-xs text-muted-foreground">Pick the base background of the website. Save to apply on the live site.</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {(Object.keys(backgroundThemes) as BackgroundTheme[]).map((key) => {
-            const t = backgroundThemes[key];
-            const bgHsl = t.vars["--background"];
-            const fgHsl = t.vars["--foreground"];
-            const cardHsl = t.vars["--card"];
-            const isActive = background === key;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setBackground(key)}
-                className={`text-left rounded-xl border-2 overflow-hidden transition-all ${isActive ? "border-primary scale-[1.02]" : "border-border hover:border-muted-foreground"}`}
-              >
-                <div style={{ backgroundColor: `hsl(${bgHsl})` }} className="p-3 space-y-2">
-                  <div style={{ backgroundColor: `hsl(${cardHsl})` }} className="h-8 rounded" />
-                  <div style={{ color: `hsl(${fgHsl})` }} className="text-xs font-semibold">{t.label}</div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Theme Colors */}
-      <div className="bg-card border border-border rounded-lg p-5 space-y-5 max-w-3xl">
-
-        <h2 className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
-          <Palette size={16} className="text-primary" /> Theme Color
-        </h2>
-
-        {/* Color Presets */}
         <div className="space-y-2">
-          <span className="text-xs text-muted-foreground font-medium">Presets</span>
-          <div className="flex flex-wrap gap-2">
-            {colorPresets.map((preset) => {
-              const c = `hsl(${preset.h}, ${preset.s}%, ${preset.l}%)`;
-              const isActive = primaryH === preset.h && primaryS === preset.s && primaryL === preset.l;
+          <div className="text-xs text-muted-foreground font-medium">Quick Presets</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {themePresets.map((p) => {
+              const isActive =
+                p.primary.join() === primary.join() &&
+                p.secondary.join() === secondary.join() &&
+                p.background.join() === background.join();
               return (
                 <button
-                  key={preset.name}
-                  onClick={() => applyPreset(preset)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${isActive ? "border-foreground bg-secondary" : "border-border hover:border-muted-foreground"}`}
+                  key={p.name}
+                  onClick={() => applyPreset(p)}
+                  className={`flex items-center gap-3 p-3 rounded-lg border transition-colors text-left ${isActive ? "border-foreground bg-secondary" : "border-border hover:border-muted-foreground"}`}
                 >
-                  <span className="w-4 h-4 rounded-full border border-border" style={{ backgroundColor: c }} />
-                  {preset.name}
+                  <div className="flex -space-x-1">
+                    <span className="w-6 h-6 rounded-full border border-border" style={{ backgroundColor: `hsl(${p.primary[0]},${p.primary[1]}%,${p.primary[2]}%)` }} />
+                    <span className="w-6 h-6 rounded-full border border-border" style={{ backgroundColor: `hsl(${p.secondary[0]},${p.secondary[1]}%,${p.secondary[2]}%)` }} />
+                    <span className="w-6 h-6 rounded-full border border-border" style={{ backgroundColor: `hsl(${p.background[0]},${p.background[1]}%,${p.background[2]}%)` }} />
+                  </div>
+                  <span className="text-xs font-medium text-foreground">{p.name}</span>
                 </button>
               );
             })}
           </div>
         </div>
+      </div>
 
-        {/* Custom Sliders */}
-        <div className="space-y-3">
-          <span className="text-xs text-muted-foreground font-medium">Custom Color</span>
-          <div className="space-y-2">
-            <label className="flex items-center justify-between text-xs text-muted-foreground">
-              Hue ({primaryH}°)
-              <input type="range" min="0" max="360" value={primaryH} onChange={e => setPrimaryH(e.target.value)} className="w-48 accent-primary" />
-            </label>
-            <label className="flex items-center justify-between text-xs text-muted-foreground">
-              Saturation ({primaryS}%)
-              <input type="range" min="0" max="100" value={primaryS} onChange={e => setPrimaryS(e.target.value)} className="w-48 accent-primary" />
-            </label>
-            <label className="flex items-center justify-between text-xs text-muted-foreground">
-              Lightness ({primaryL}%)
-              <input type="range" min="20" max="80" value={primaryL} onChange={e => setPrimaryL(e.target.value)} className="w-48 accent-primary" />
-            </label>
+      {/* Custom Colors */}
+      <div className="bg-card border border-border rounded-lg p-5 space-y-5 max-w-3xl">
+        <h2 className="font-display text-sm font-semibold text-foreground">Custom Colors</h2>
+        <ColorEditor
+          label="Primary Color"
+          description="Main brand color — buttons, links, highlights"
+          value={primary}
+          onChange={setPrimary}
+        />
+        <ColorEditor
+          label="Secondary Color"
+          description="Muted surfaces — chips, borders, alt panels"
+          value={secondary}
+          onChange={setSecondary}
+        />
+        <ColorEditor
+          label="Background Color"
+          description="Page background base tone (and cards)"
+          value={background}
+          onChange={setBackground}
+        />
+
+        {/* Live Preview */}
+        <div
+          className="rounded-xl border border-border p-4 space-y-3"
+          style={{ backgroundColor: `hsl(${background[0]},${background[1]}%,${background[2]}%)` }}
+        >
+          <div className="text-xs font-medium" style={{ color: Number(background[2]) > 50 ? "#222" : "#eee" }}>
+            Live Preview
           </div>
-        </div>
-
-        {/* Preview */}
-        <div className="flex items-center gap-4 pt-2">
-          <span className="text-xs text-muted-foreground">Preview:</span>
-          <div className="w-12 h-12 rounded-lg border border-border" style={{ backgroundColor: previewColor }} />
-          <div className="space-y-1">
-            <span className="block text-sm font-display font-semibold" style={{ color: previewColor }}>Sample Heading</span>
-            <span className="block text-xs" style={{ color: previewColor, opacity: 0.7 }}>Sample accent text</span>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="px-4 py-2 rounded-lg text-xs font-semibold text-white"
+              style={{ backgroundColor: `hsl(${primary[0]},${primary[1]}%,${primary[2]}%)` }}
+            >
+              Primary Button
+            </button>
+            <button
+              type="button"
+              className="px-4 py-2 rounded-lg text-xs font-semibold text-white"
+              style={{ backgroundColor: `hsl(${secondary[0]},${secondary[1]}%,${secondary[2]}%)` }}
+            >
+              Secondary
+            </button>
           </div>
         </div>
       </div>
