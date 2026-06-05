@@ -42,7 +42,14 @@ const HeroSection = () => {
           className="mx-auto mb-8 w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-2 border-primary/50 box-glow bg-muted"
         >
           {profileImg ? (
-            <img src={profileImg} alt="Dheer Joshi" className="w-full h-full object-cover" />
+            <img
+              src={profileImg}
+              alt="Dheer Joshi"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="w-full h-full object-cover"
+            />
           ) : (
             <div className="w-full h-full animate-pulse bg-muted" />
           )}

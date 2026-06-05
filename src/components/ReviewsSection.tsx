@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Star, Send } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, Send, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +15,8 @@ interface Review {
 
 const ReviewsSection = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [rating, setRating] = useState(5);
@@ -27,6 +29,16 @@ const ReviewsSection = () => {
     fetchReviews();
   }, []);
 
+  // Auto-advance every 5 seconds
+  useEffect(() => {
+    if (reviews.length < 2) return;
+    const t = setInterval(() => {
+      setDirection(1);
+      setIndex((i) => (i + 1) % reviews.length);
+    }, 5000);
+    return () => clearInterval(t);
+  }, [reviews.length]);
+
   const fetchReviews = async () => {
     const { data } = await supabase
       .from("reviews")
@@ -34,6 +46,15 @@ const ReviewsSection = () => {
       .eq("hidden", false)
       .order("created_at", { ascending: false });
     if (data) setReviews(data);
+  };
+
+  const next = () => {
+    setDirection(1);
+    setIndex((i) => (i + 1) % reviews.length);
+  };
+  const prev = () => {
+    setDirection(-1);
+    setIndex((i) => (i - 1 + reviews.length) % reviews.length);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,13 +72,12 @@ const ReviewsSection = () => {
       toast({ title: "Failed to submit review", variant: "destructive" });
     } else {
       toast({ title: "Review submitted! Thank you 🎉" });
-      setName("");
-      setEmail("");
-      setRating(5);
-      setMessage("");
+      setName(""); setEmail(""); setRating(5); setMessage("");
       fetchReviews();
     }
   };
+
+  const current = reviews[index];
 
   return (
     <section id="reviews" className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
@@ -76,13 +96,87 @@ const ReviewsSection = () => {
           </p>
         </motion.div>
 
+        {/* Slider */}
+        {reviews.length > 0 ? (
+          <div className="relative max-w-2xl mx-auto mb-16">
+            <div className="relative h-64 sm:h-56 overflow-hidden">
+              <AnimatePresence initial={false} custom={direction} mode="wait">
+                <motion.div
+                  key={current.id}
+                  custom={direction}
+                  initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="absolute inset-0 bg-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          size={18}
+                          className={s <= current.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground/30"}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-sm sm:text-base text-foreground leading-relaxed line-clamp-5">
+                      "{current.message}"
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-border mt-3">
+                    <span className="font-semibold text-foreground text-sm">— {current.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(current.created_at).toLocaleDateString("en-IN", {
+                        day: "numeric", month: "short", year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {reviews.length > 1 && (
+              <>
+                <button
+                  onClick={prev}
+                  aria-label="Previous"
+                  className="absolute left-0 sm:-left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center hover:bg-secondary transition-colors"
+                >
+                  <ChevronLeft size={18} className="text-foreground" />
+                </button>
+                <button
+                  onClick={next}
+                  aria-label="Next"
+                  className="absolute right-0 sm:-right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center hover:bg-secondary transition-colors"
+                >
+                  <ChevronRight size={18} className="text-foreground" />
+                </button>
+
+                <div className="flex justify-center gap-1.5 mt-4">
+                  {reviews.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setDirection(i > index ? 1 : -1); setIndex(i); }}
+                      aria-label={`Go to review ${i + 1}`}
+                      className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/40"}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground mb-16">No reviews yet. Be the first!</p>
+        )}
+
         {/* Review Form */}
         <motion.form
           onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-xl mx-auto mb-16 bg-card border border-border rounded-2xl p-6 space-y-4"
+          className="max-w-xl mx-auto bg-card border border-border rounded-2xl p-6 space-y-4"
         >
           <h3 className="text-lg font-semibold text-foreground">Leave a Review</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -140,51 +234,6 @@ const ReviewsSection = () => {
             {submitting ? "Submitting..." : "Submit Review"}
           </button>
         </motion.form>
-
-        {/* Reviews Grid */}
-        {reviews.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reviews.map((review, i) => (
-              <motion.div
-                key={review.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="bg-card border border-border rounded-2xl p-5 space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-foreground">{review.name}</span>
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star
-                        key={s}
-                        size={14}
-                        className={
-                          s <= review.rating
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-muted-foreground/30"
-                        }
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {review.message}
-                </p>
-                <p className="text-xs text-muted-foreground/60">
-                  {new Date(review.created_at).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground">No reviews yet. Be the first!</p>
-        )}
       </div>
     </section>
   );
