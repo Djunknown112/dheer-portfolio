@@ -39,13 +39,26 @@ const Navbar = () => {
     e.preventDefault();
     setIsOpen(false);
     const id = href.replace("#", "");
-    const el = document.getElementById(id);
-    if (el) {
+    // Force every LazySection on the page to mount so layouts settle and
+    // anchor scrolling lands on the actual section (esp. on mobile).
+    window.dispatchEvent(new Event("lovable:preload-all"));
+
+    const scrollToTarget = () => {
+      const el = document.getElementById(id);
+      if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY - 70;
       window.scrollTo({ top, behavior: "smooth" });
       history.replaceState(null, "", href);
-    }
+    };
+
+    // Wait a frame so newly-mounted sections take up space before we measure.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToTarget);
+      // Also re-correct after images/fonts likely settled.
+      setTimeout(scrollToTarget, 250);
+    });
   };
+
 
   return (
     <motion.nav
