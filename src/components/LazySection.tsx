@@ -8,9 +8,9 @@ interface LazySectionProps {
 }
 
 /**
- * Defers mounting of its children until close to entering the viewport.
- * Accepts an `id` so anchor links (e.g. #projects) can scroll to the placeholder
- * even before the lazy children mount — preventing "broken" nav links on mobile.
+ * Defers mounting of its children until close to entering the viewport,
+ * OR until a `lovable:preload-all` window event is fired (used by the navbar
+ * so anchor links scroll to the *real* section position on mobile).
  */
 const LazySection = ({ children, minHeight = "400px", rootMargin = "300px", id }: LazySectionProps) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -30,6 +30,13 @@ const LazySection = ({ children, minHeight = "400px", rootMargin = "300px", id }
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, [visible, rootMargin]);
+
+  // Listen for global preload event (fired when a nav link is clicked).
+  useEffect(() => {
+    const handler = () => setVisible(true);
+    window.addEventListener("lovable:preload-all", handler);
+    return () => window.removeEventListener("lovable:preload-all", handler);
+  }, []);
 
   return (
     <div id={id} ref={ref} style={!visible ? { minHeight } : undefined}>
