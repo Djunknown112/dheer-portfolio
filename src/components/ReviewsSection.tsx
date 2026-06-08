@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 interface Review {
   id: string;
   name: string;
-  email: string;
   rating: number;
   message: string;
   created_at: string;
@@ -40,12 +39,8 @@ const ReviewsSection = () => {
   }, [reviews.length]);
 
   const fetchReviews = async () => {
-    const { data } = await supabase
-      .from("reviews")
-      .select("*")
-      .eq("hidden", false)
-      .order("created_at", { ascending: false });
-    if (data) setReviews(data);
+    const { data } = await supabase.rpc("get_public_reviews");
+    if (data) setReviews(data as Review[]);
   };
 
   const next = () => {
