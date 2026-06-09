@@ -62,6 +62,10 @@ const ReviewsSection = () => {
       toast({ title: "Please fill all fields", variant: "destructive" });
       return;
     }
+    if (!EMAIL_RE.test(email.trim())) {
+      toast({ title: "Please enter a valid email address", variant: "destructive" });
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase
       .from("reviews")
