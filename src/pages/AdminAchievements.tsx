@@ -30,7 +30,8 @@ const AdminAchievements = () => {
   const openNew = () => { setEditing(null); setForm({ title: "", description: "", date: "" }); setPhotoFile(null); setShowForm(true); };
   const openEdit = (a: Achievement) => { setEditing(a); setForm({ title: a.title, description: a.description, date: a.date || "" }); setPhotoFile(null); setShowForm(true); };
 
-  const uploadPhoto = async (file: File) => {
+  const uploadPhoto = async (rawFile: File) => {
+    const file = await enhanceImage(rawFile);
     const path = `${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("achievement-photos").upload(path, file);
     if (error) throw error;
