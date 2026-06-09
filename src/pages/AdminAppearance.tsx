@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Save, Upload, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { themePresets, applyTheme, type ThemePreset } from "@/hooks/useTheme";
+import { enhanceImage } from "@/lib/imageEnhance";
 
 type Triple = [string, string, string];
 
