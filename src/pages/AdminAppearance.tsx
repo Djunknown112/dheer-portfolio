@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Save, Upload, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { themePresets, applyTheme, type ThemePreset } from "@/hooks/useTheme";
+import { enhanceImage } from "@/lib/imageEnhance";
 
 type Triple = [string, string, string];
 
@@ -101,8 +102,11 @@ const AdminAppearance = () => {
     fetchContent();
   }, []);
 
-  const uploadFile = async (file: File, bucket: string, path: string) => {
-    const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
+  const uploadFile = async (rawFile: File, bucket: string, path: string) => {
+    const file = await enhanceImage(rawFile);
+    const ext = file.name.split(".").pop();
+    const finalPath = path.replace(/\.[^.]+$/, `.${ext}`);
+    const { data, error } = await supabase.storage.from(bucket).upload(finalPath, file, { upsert: true });
     if (error) throw error;
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
     return urlData.publicUrl;

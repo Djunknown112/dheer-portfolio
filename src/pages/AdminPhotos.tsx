@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { SortableList } from "@/components/admin/SortableList";
+import { enhanceImage } from "@/lib/imageEnhance";
 
 type Photo = { id: string; caption: string; category: string; image_url: string };
 
@@ -26,8 +27,8 @@ const AdminPhotos = () => {
     setUploading(true);
 
     for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const path = `${Date.now()}-${file.name}`;
+      const file = await enhanceImage(files[i]);
+      const path = `${Date.now()}-${i}-${file.name}`;
       const { error: uploadErr } = await supabase.storage.from("gallery").upload(path, file);
       if (uploadErr) { toast.error(`Upload failed: ${file.name}`); continue; }
       const { data } = supabase.storage.from("gallery").getPublicUrl(path);
