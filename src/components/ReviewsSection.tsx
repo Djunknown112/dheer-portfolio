@@ -10,7 +10,11 @@ interface Review {
   rating: number;
   message: string;
   created_at: string;
+  avatar_hash?: string | null;
 }
+
+// RFC 5322-ish practical email validation
+const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const ReviewsSection = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
