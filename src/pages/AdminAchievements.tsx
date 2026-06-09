@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { SortableList } from "@/components/admin/SortableList";
+import { enhanceImage } from "@/lib/imageEnhance";
 
 type Achievement = {
   id: string;
