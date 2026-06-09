@@ -115,10 +115,13 @@ const ReviewsSection = () => {
                 >
                   {current.avatar_hash && (
                     <img
-                      src={`https://www.gravatar.com/avatar/${current.avatar_hash}?s=80&d=mp`}
+                      src={`https://unavatar.io/${current.avatar_hash}?fallback=https://www.gravatar.com/avatar/${current.avatar_hash}?s=80%26d=https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}`}
                       alt={`${current.name} avatar`}
                       loading="lazy"
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}`;
+                      }}
                       className="absolute top-4 right-4 w-10 h-10 rounded-full border border-border object-cover bg-muted"
                     />
                   )}
