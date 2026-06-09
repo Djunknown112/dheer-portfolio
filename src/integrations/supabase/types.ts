@@ -339,6 +339,7 @@ export type Database = {
       get_public_reviews: {
         Args: never
         Returns: {
+          avatar_hash: string
           created_at: string
           id: string
           message: string
