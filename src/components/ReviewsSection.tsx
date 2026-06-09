@@ -109,7 +109,16 @@ const ReviewsSection = () => {
                   transition={{ duration: 0.5, ease: "easeInOut" }}
                   className="absolute inset-0 bg-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col justify-between"
                 >
-                  <div className="space-y-3">
+                  {current.avatar_hash && (
+                    <img
+                      src={`https://www.gravatar.com/avatar/${current.avatar_hash}?s=80&d=mp`}
+                      alt={`${current.name} avatar`}
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      className="absolute top-4 right-4 w-10 h-10 rounded-full border border-border object-cover bg-muted"
+                    />
+                  )}
+                  <div className="space-y-3 pr-12">
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star
