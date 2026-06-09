@@ -27,11 +27,18 @@ const AdminPhotos = () => {
     setUploading(true);
 
     for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const path = `${Date.now()}-${file.name}`;
+      const file = await enhanceImage(files[i]);
+      const path = `${Date.now()}-${i}-${file.name}`;
       const { error: uploadErr } = await supabase.storage.from("gallery").upload(path, file);
       if (uploadErr) { toast.error(`Upload failed: ${file.name}`); continue; }
       const { data } = supabase.storage.from("gallery").getPublicUrl(path);
+
+      await supabase.from("photos").insert({
+        caption: form.caption || file.name,
+        category: form.category,
+        image_url: data.publicUrl,
+      });
+    }
 
       await supabase.from("photos").insert({
         caption: form.caption || file.name,
