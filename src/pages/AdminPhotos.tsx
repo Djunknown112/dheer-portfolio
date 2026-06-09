@@ -40,13 +40,6 @@ const AdminPhotos = () => {
       });
     }
 
-      await supabase.from("photos").insert({
-        caption: form.caption || file.name,
-        category: form.category,
-        image_url: data.publicUrl,
-      });
-    }
-
     toast.success("Photos uploaded!");
     setShowForm(false);
     setUploading(false);
