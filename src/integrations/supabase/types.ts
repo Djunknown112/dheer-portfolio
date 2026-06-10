@@ -252,6 +252,7 @@ export type Database = {
       }
       reviews: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string
           hidden: boolean
@@ -259,8 +260,10 @@ export type Database = {
           message: string
           name: string
           rating: number
+          user_id: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           email: string
           hidden?: boolean
@@ -268,8 +271,10 @@ export type Database = {
           message: string
           name: string
           rating?: number
+          user_id?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           email?: string
           hidden?: boolean
@@ -277,6 +282,7 @@ export type Database = {
           message?: string
           name?: string
           rating?: number
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -340,6 +346,7 @@ export type Database = {
         Args: never
         Returns: {
           avatar_hash: string
+          avatar_url: string
           created_at: string
           id: string
           message: string
