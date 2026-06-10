@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Send, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Send, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { useToast } from "@/hooks/use-toast";
+import type { User } from "@supabase/supabase-js";
 
 interface Review {
   id: string;
@@ -11,28 +13,29 @@ interface Review {
   message: string;
   created_at: string;
   avatar_hash?: string | null;
+  avatar_url?: string | null;
 }
-
-// RFC 5322-ish practical email validation
-const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const ReviewsSection = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [rating, setRating] = useState(5);
   const [message, setMessage] = useState("");
   const [hoveredStar, setHoveredStar] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchReviews();
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Auto-advance every 5 seconds
   useEffect(() => {
     if (reviews.length < 2) return;
     const t = setInterval(() => {
@@ -47,35 +50,49 @@ const ReviewsSection = () => {
     if (data) setReviews(data as Review[]);
   };
 
-  const next = () => {
-    setDirection(1);
-    setIndex((i) => (i + 1) % reviews.length);
+  const next = () => { setDirection(1); setIndex((i) => (i + 1) % reviews.length); };
+  const prev = () => { setDirection(-1); setIndex((i) => (i - 1 + reviews.length) % reviews.length); };
+
+  const handleGoogleSignIn = async () => {
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/#reviews",
+    });
+    if (result.error) {
+      toast({ title: "Sign-in failed", description: String((result.error as any).message ?? result.error), variant: "destructive" });
+    }
   };
-  const prev = () => {
-    setDirection(-1);
-    setIndex((i) => (i - 1 + reviews.length) % reviews.length);
-  };
+
+  const handleSignOut = async () => { await supabase.auth.signOut(); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) {
-      toast({ title: "Please fill all fields", variant: "destructive" });
+    if (!user) {
+      toast({ title: "Please sign in with Google first", variant: "destructive" });
       return;
     }
-    if (!EMAIL_RE.test(email.trim())) {
-      toast({ title: "Please enter a valid email address", variant: "destructive" });
+    if (!message.trim()) {
+      toast({ title: "Please write a review", variant: "destructive" });
       return;
     }
+    const meta = (user.user_metadata ?? {}) as Record<string, any>;
+    const name = meta.full_name || meta.name || user.email?.split("@")[0] || "Anonymous";
+    const avatar_url = meta.avatar_url || meta.picture || null;
+
     setSubmitting(true);
-    const { error } = await supabase
-      .from("reviews")
-      .insert({ name: name.trim(), email: email.trim(), rating, message: message.trim() });
+    const { error } = await supabase.from("reviews").insert({
+      name,
+      email: user.email ?? "",
+      rating,
+      message: message.trim(),
+      avatar_url,
+      user_id: user.id,
+    });
     setSubmitting(false);
     if (error) {
-      toast({ title: "Failed to submit review", variant: "destructive" });
+      toast({ title: "Failed to submit review", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Review submitted! Thank you 🎉" });
-      setName(""); setEmail(""); setRating(5); setMessage("");
+      setRating(5); setMessage("");
       fetchReviews();
     }
   };
