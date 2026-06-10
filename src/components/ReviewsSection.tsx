@@ -114,15 +114,21 @@ const ReviewsSection = () => {
                   className="absolute inset-0 bg-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col justify-between"
                 >
                   <img
+                    key={current.id}
                     src={
                       current.avatar_hash
-                        ? `https://www.gravatar.com/avatar/${current.avatar_hash}?s=160&d=${encodeURIComponent(`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear`)}`
-                        : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear`
+                        ? `https://www.gravatar.com/avatar/${current.avatar_hash}?s=160&d=404`
+                        : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear&backgroundColor=00897b,1e88e5,5e35b1,8e24aa,d81b60,f4511e`
                     }
-                    alt={`${current.name} avatar`}
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      const fallback = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear&backgroundColor=00897b,1e88e5,5e35b1,8e24aa,d81b60,f4511e`;
+                      if (img.src !== fallback) img.src = fallback;
+                    }}
+                    alt={`${current.name}`}
                     loading="lazy"
                     referrerPolicy="no-referrer"
-                    className="absolute top-4 right-4 w-10 h-10 rounded-full border border-border object-cover bg-muted"
+                    className="absolute top-4 right-4 w-11 h-11 rounded-full border-2 border-primary/40 object-cover bg-muted shadow-md"
                   />
                   <div className="space-y-3 pr-12">
                     <div className="flex gap-0.5">
