@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Send, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Send, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { useToast } from "@/hooks/use-toast";
+import type { User } from "@supabase/supabase-js";
 
 interface Review {
   id: string;
@@ -11,28 +13,29 @@ interface Review {
   message: string;
   created_at: string;
   avatar_hash?: string | null;
+  avatar_url?: string | null;
 }
-
-// RFC 5322-ish practical email validation
-const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const ReviewsSection = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [rating, setRating] = useState(5);
   const [message, setMessage] = useState("");
   const [hoveredStar, setHoveredStar] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchReviews();
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Auto-advance every 5 seconds
   useEffect(() => {
     if (reviews.length < 2) return;
     const t = setInterval(() => {
@@ -47,35 +50,49 @@ const ReviewsSection = () => {
     if (data) setReviews(data as Review[]);
   };
 
-  const next = () => {
-    setDirection(1);
-    setIndex((i) => (i + 1) % reviews.length);
+  const next = () => { setDirection(1); setIndex((i) => (i + 1) % reviews.length); };
+  const prev = () => { setDirection(-1); setIndex((i) => (i - 1 + reviews.length) % reviews.length); };
+
+  const handleGoogleSignIn = async () => {
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/#reviews",
+    });
+    if (result.error) {
+      toast({ title: "Sign-in failed", description: String((result.error as any).message ?? result.error), variant: "destructive" });
+    }
   };
-  const prev = () => {
-    setDirection(-1);
-    setIndex((i) => (i - 1 + reviews.length) % reviews.length);
-  };
+
+  const handleSignOut = async () => { await supabase.auth.signOut(); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) {
-      toast({ title: "Please fill all fields", variant: "destructive" });
+    if (!user) {
+      toast({ title: "Please sign in with Google first", variant: "destructive" });
       return;
     }
-    if (!EMAIL_RE.test(email.trim())) {
-      toast({ title: "Please enter a valid email address", variant: "destructive" });
+    if (!message.trim()) {
+      toast({ title: "Please write a review", variant: "destructive" });
       return;
     }
+    const meta = (user.user_metadata ?? {}) as Record<string, any>;
+    const name = meta.full_name || meta.name || user.email?.split("@")[0] || "Anonymous";
+    const avatar_url = meta.avatar_url || meta.picture || null;
+
     setSubmitting(true);
-    const { error } = await supabase
-      .from("reviews")
-      .insert({ name: name.trim(), email: email.trim(), rating, message: message.trim() });
+    const { error } = await supabase.from("reviews").insert({
+      name,
+      email: user.email ?? "",
+      rating,
+      message: message.trim(),
+      avatar_url,
+      user_id: user.id,
+    });
     setSubmitting(false);
     if (error) {
-      toast({ title: "Failed to submit review", variant: "destructive" });
+      toast({ title: "Failed to submit review", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Review submitted! Thank you 🎉" });
-      setName(""); setEmail(""); setRating(5); setMessage("");
+      setRating(5); setMessage("");
       fetchReviews();
     }
   };
@@ -116,9 +133,10 @@ const ReviewsSection = () => {
                   <img
                     key={current.id}
                     src={
-                      current.avatar_hash
+                      current.avatar_url ||
+                      (current.avatar_hash
                         ? `https://www.gravatar.com/avatar/${current.avatar_hash}?s=160&d=404`
-                        : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear&backgroundColor=00897b,1e88e5,5e35b1,8e24aa,d81b60,f4511e`
+                        : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear&backgroundColor=00897b,1e88e5,5e35b1,8e24aa,d81b60,f4511e`)
                     }
                     onError={(e) => {
                       const img = e.currentTarget;
@@ -191,69 +209,99 @@ const ReviewsSection = () => {
         )}
 
         {/* Review Form */}
-        <motion.form
-          onSubmit={handleSubmit}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="max-w-xl mx-auto bg-card border border-border rounded-2xl p-6 space-y-4"
         >
-          <h3 className="text-lg font-semibold text-foreground">Leave a Review</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your Name"
-              maxLength={100}
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
-            />
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your Email"
-              type="email"
-              maxLength={255}
-              className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
-            />
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-sm text-muted-foreground mr-2">Rating:</span>
-            {[1, 2, 3, 4, 5].map((s) => (
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-foreground">Leave a Review</h3>
+            {user && (
               <button
-                key={s}
-                type="button"
-                onClick={() => setRating(s)}
-                onMouseEnter={() => setHoveredStar(s)}
-                onMouseLeave={() => setHoveredStar(0)}
+                onClick={handleSignOut}
+                className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
               >
-                <Star
-                  size={22}
-                  className={`transition-colors ${
-                    s <= (hoveredStar || rating)
-                      ? "text-yellow-400 fill-yellow-400"
-                      : "text-muted-foreground/30"
-                  }`}
-                />
+                <LogOut size={12} /> Sign out
               </button>
-            ))}
+            )}
           </div>
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Write your review..."
-            rows={3}
-            maxLength={1000}
-            className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm resize-none"
-          />
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            <Send size={16} />
-            {submitting ? "Submitting..." : "Submit Review"}
-          </button>
-        </motion.form>
+
+          {!user ? (
+            <div className="text-center py-4 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Sign in with Google so your real profile photo and name appear on your review.
+              </p>
+              <button
+                onClick={handleGoogleSignIn}
+                className="inline-flex items-center gap-3 px-5 py-2.5 rounded-lg bg-background border border-border text-foreground font-medium text-sm hover:bg-secondary transition-colors"
+              >
+                <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8a12 12 0 1 1 0-24c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 1 0 24 44c11 0 20-9 20-20 0-1.2-.1-2.3-.4-3.5z"/>
+                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16.1 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
+                  <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3A12 12 0 0 1 12.7 28l-6.5 5A20 20 0 0 0 24 44z"/>
+                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4 5.5l6.3 5.3C41.4 35 44 30 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                </svg>
+                Continue with Google
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-background border border-border">
+                <img
+                  src={(user.user_metadata as any)?.avatar_url || (user.user_metadata as any)?.picture}
+                  alt="You"
+                  referrerPolicy="no-referrer"
+                  className="w-10 h-10 rounded-full object-cover border border-border"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {(user.user_metadata as any)?.full_name || (user.user_metadata as any)?.name || user.email}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Posting as your Google account</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <span className="text-sm text-muted-foreground mr-2">Rating:</span>
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setRating(s)}
+                    onMouseEnter={() => setHoveredStar(s)}
+                    onMouseLeave={() => setHoveredStar(0)}
+                  >
+                    <Star
+                      size={22}
+                      className={`transition-colors ${
+                        s <= (hoveredStar || rating)
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-muted-foreground/30"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Write your review..."
+                rows={3}
+                maxLength={1000}
+                className="w-full px-4 py-2.5 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm resize-none"
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                <Send size={16} />
+                {submitting ? "Submitting..." : "Submit Review"}
+              </button>
+            </form>
+          )}
+        </motion.div>
       </div>
     </section>
   );
