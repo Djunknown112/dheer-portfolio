@@ -4,24 +4,42 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/AdminLogin";
-import AdminResetPassword from "./pages/AdminResetPassword";
-import AdminLayout from "./components/AdminLayout";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminProjects from "./pages/AdminProjects";
-import AdminAchievements from "./pages/AdminAchievements";
-import AdminDocuments from "./pages/AdminDocuments";
-import AdminPhotos from "./pages/AdminPhotos";
-import AdminContent from "./pages/AdminContent";
-import AdminSkills from "./pages/AdminSkills";
-import AdminMessages from "./pages/AdminMessages";
-import AdminAboutHighlights from "./pages/AdminAboutHighlights";
-import AdminAppearance from "./pages/AdminAppearance";
-import AdminReviews from "./pages/AdminReviews";
 
-const queryClient = new QueryClient();
+// Code-split everything except the landing page so the initial JS bundle stays small
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminResetPassword = lazy(() => import("./pages/AdminResetPassword"));
+const AdminLayout = lazy(() => import("./components/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminProjects = lazy(() => import("./pages/AdminProjects"));
+const AdminAchievements = lazy(() => import("./pages/AdminAchievements"));
+const AdminMentors = lazy(() => import("./pages/AdminMentors"));
+const AdminDocuments = lazy(() => import("./pages/AdminDocuments"));
+const AdminPhotos = lazy(() => import("./pages/AdminPhotos"));
+const AdminContent = lazy(() => import("./pages/AdminContent"));
+const AdminSkills = lazy(() => import("./pages/AdminSkills"));
+const AdminMessages = lazy(() => import("./pages/AdminMessages"));
+const AdminAboutHighlights = lazy(() => import("./pages/AdminAboutHighlights"));
+const AdminAppearance = lazy(() => import("./pages/AdminAppearance"));
+const AdminReviews = lazy(() => import("./pages/AdminReviews"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 min — return cached data instantly on revisit
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const RouteFallback = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center text-primary text-sm font-display animate-pulse">
+    Loading…
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -30,25 +48,28 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/reset-password" element={<AdminResetPassword />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="projects" element={<AdminProjects />} />
-              <Route path="achievements" element={<AdminAchievements />} />
-              <Route path="documents" element={<AdminDocuments />} />
-              <Route path="photos" element={<AdminPhotos />} />
-              <Route path="content" element={<AdminContent />} />
-              <Route path="skills" element={<AdminSkills />} />
-              <Route path="messages" element={<AdminMessages />} />
-              <Route path="about-highlights" element={<AdminAboutHighlights />} />
-              <Route path="appearance" element={<AdminAppearance />} />
-              <Route path="reviews" element={<AdminReviews />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="projects" element={<AdminProjects />} />
+                <Route path="achievements" element={<AdminAchievements />} />
+                <Route path="mentors" element={<AdminMentors />} />
+                <Route path="documents" element={<AdminDocuments />} />
+                <Route path="photos" element={<AdminPhotos />} />
+                <Route path="content" element={<AdminContent />} />
+                <Route path="skills" element={<AdminSkills />} />
+                <Route path="messages" element={<AdminMessages />} />
+                <Route path="about-highlights" element={<AdminAboutHighlights />} />
+                <Route path="appearance" element={<AdminAppearance />} />
+                <Route path="reviews" element={<AdminReviews />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

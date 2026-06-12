@@ -67,7 +67,6 @@ const ColorEditor = ({
 
 const AdminAppearance = () => {
   const [profileUrl, setProfileUrl] = useState("");
-  const [heroUrl, setHeroUrl] = useState("");
   const [primary, setPrimary] = useState<Triple>(["185", "80", "55"]);
   const [secondary, setSecondary] = useState<Triple>(["220", "15", "15"]);
   const [background, setBackground] = useState<Triple>(["220", "20", "7"]);

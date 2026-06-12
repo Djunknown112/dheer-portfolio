@@ -3,12 +3,15 @@ import { ArrowDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import MagneticButton from "@/components/MagneticButton";
+import heroBgAsset from "@/assets/hero-tech-bg.webp.asset.json";
+
+// Hero background is auto-generated, tech-themed, and shipped with the app.
+// It is *not* admin-editable — the admin panel intentionally has no control for it.
+const HERO_BG_URL = heroBgAsset.url;
 
 const HeroSection = () => {
   const [profileImg, setProfileImg] = useState<string | null>(null);
-  const [heroBg, setHeroBg] = useState<string | null>(null);
   const [subtitle, setSubtitle] = useState("Young Innovator & Tech Builder");
-  const [loaded, setLoaded] = useState(false);
 
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -18,15 +21,16 @@ const HeroSection = () => {
 
   useEffect(() => {
     const fetchContent = async () => {
-      const { data } = await supabase.from("site_content").select("*");
+      const { data } = await supabase
+        .from("site_content")
+        .select("key,value")
+        .in("key", ["profile_photo_url", "hero_subtitle"]);
       if (data) {
         const map: Record<string, string> = {};
         data.forEach((d) => { map[d.key] = d.value; });
         if (map["profile_photo_url"]) setProfileImg(map["profile_photo_url"]);
-        if (map["hero_bg_url"]) setHeroBg(map["hero_bg_url"]);
         if (map["hero_subtitle"]) setSubtitle(map["hero_subtitle"]);
       }
-      setLoaded(true);
     };
     fetchContent();
   }, []);
@@ -38,10 +42,23 @@ const HeroSection = () => {
       ref={ref}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Parallax background */}
+      {/* Parallax background — auto-generated tech artwork, themed */}
       <motion.div style={{ y: bgY }} className="absolute inset-0 will-change-transform">
-        {heroBg && <img src={heroBg} alt="" className="w-full h-[120%] object-cover opacity-40" />}
-        {!heroBg && !loaded && <div className="w-full h-full bg-background" />}
+        <img
+          src={HERO_BG_URL}
+          alt=""
+          width={1920}
+          height={1080}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="w-full h-[120%] object-cover opacity-50"
+        />
+        {/* Theme tint overlay — picks up the primary color from the active theme */}
+        <div
+          className="absolute inset-0 mix-blend-overlay opacity-40"
+          style={{ background: "radial-gradient(circle at 30% 30%, hsl(var(--primary) / 0.35), transparent 60%)" }}
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
       </motion.div>
 
