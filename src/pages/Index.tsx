@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 // Code-split below-the-fold sections so they don't ship in the initial bundle
 const ProjectsSection = lazy(() => import("@/components/ProjectsSection"));
 const AchievementsSection = lazy(() => import("@/components/AchievementsSection"));
+const MentorsSection = lazy(() => import("@/components/MentorsSection"));
 const SkillsSection = lazy(() => import("@/components/SkillsSection"));
 const DocumentsSection = lazy(() => import("@/components/DocumentsSection"));
 const GallerySection = lazy(() => import("@/components/GallerySection"));
@@ -41,6 +42,12 @@ const Index = () => {
       <LazySection id="achievements" minHeight="500px">
         <Suspense fallback={<SectionFallback h="500px" />}>
           <AchievementsSection />
+        </Suspense>
+      </LazySection>
+
+      <LazySection id="mentors" minHeight="400px">
+        <Suspense fallback={<SectionFallback h="400px" />}>
+          <MentorsSection />
         </Suspense>
       </LazySection>
 
