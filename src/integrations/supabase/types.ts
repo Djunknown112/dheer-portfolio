@@ -134,6 +134,36 @@ export type Database = {
         }
         Relationships: []
       }
+      mentors: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          photo_url: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          photo_url?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          photo_url?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       photos: {
         Row: {
           caption: string
