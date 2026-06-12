@@ -80,7 +80,7 @@ const AdminAppearance = () => {
         const map: Record<string, string> = {};
         data.forEach(d => { map[d.key] = d.value; });
         if (map["profile_photo_url"]) setProfileUrl(map["profile_photo_url"]);
-        if (map["hero_bg_url"]) setHeroUrl(map["hero_bg_url"]);
+        // hero_bg_url is intentionally ignored — the hero background is auto-generated
         setPrimary([
           map["theme_primary_h"] ?? "185",
           map["theme_primary_s"] ?? "80",
@@ -125,19 +125,8 @@ const AdminAppearance = () => {
     setUploading(false);
   };
 
-  const handleHeroUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const url = await uploadFile(file, "gallery", `hero/hero-bg.${file.name.split('.').pop()}`);
-      setHeroUrl(url);
-      toast.success("Hero background uploaded!");
-    } catch (err: any) {
-      toast.error("Upload failed: " + err.message);
-    }
-    setUploading(false);
-  };
+  // Hero background is auto-generated and shipped with the app; no upload control here.
+
 
   const applyPreset = (preset: ThemePreset) => {
     setPrimary(preset.primary);
@@ -158,7 +147,7 @@ const AdminAppearance = () => {
       theme_background_h: background[0], theme_background_s: background[1], theme_background_l: background[2],
     };
     if (profileUrl) entries["profile_photo_url"] = profileUrl;
-    if (heroUrl) entries["hero_bg_url"] = heroUrl;
+    // hero_bg_url removed — the hero background is now a built-in tech artwork
 
     for (const [key, value] of Object.entries(entries)) {
       const { data: existing } = await supabase.from("site_content").select("id").eq("key", key).maybeSingle();
@@ -187,7 +176,7 @@ const AdminAppearance = () => {
         </div>
       </div>
 
-      {/* Profile & Hero Photos */}
+      {/* Profile Photo */}
       <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
         <div className="bg-card border border-border rounded-lg p-5 space-y-4">
           <h2 className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
@@ -204,20 +193,16 @@ const AdminAppearance = () => {
           </label>
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-5 space-y-4">
+        <div className="bg-card border border-border rounded-lg p-5 space-y-3">
           <h2 className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
-            <Upload size={16} className="text-primary" /> Hero Background
+            <Palette size={16} className="text-primary" /> Hero Background
           </h2>
-          {heroUrl && (
-            <div className="w-full h-24 rounded-lg overflow-hidden border border-border">
-              <img src={heroUrl} alt="Hero BG" className="w-full h-full object-cover" />
-            </div>
-          )}
-          <label className="block">
-            <span className="text-xs text-muted-foreground">Upload new background</span>
-            <input type="file" accept="image/*" onChange={handleHeroUpload} disabled={uploading} className="mt-1 block w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-          </label>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            The hero background is an auto-generated tech artwork that adapts to your color theme.
+            It updates automatically — no manual upload needed.
+          </p>
         </div>
+
       </div>
 
       {/* Quick Presets */}
