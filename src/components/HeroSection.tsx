@@ -52,14 +52,15 @@ const HeroSection = () => {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="w-full h-[120%] object-cover opacity-50"
+          className="w-full h-[120%] object-cover opacity-90"
         />
         {/* Theme tint overlay — picks up the primary color from the active theme */}
         <div
-          className="absolute inset-0 mix-blend-overlay opacity-40"
-          style={{ background: "radial-gradient(circle at 30% 30%, hsl(var(--primary) / 0.35), transparent 60%)" }}
+          className="absolute inset-0 mix-blend-screen opacity-30"
+          style={{ background: "radial-gradient(circle at 30% 30%, hsl(var(--primary) / 0.4), transparent 65%)" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+        {/* Subtle vignette so content stays readable without hiding the artwork */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background/85" />
       </motion.div>
 
       <motion.div

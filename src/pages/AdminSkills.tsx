@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Save, GripVertical, icons as LucideIcons } from "lucide-react";
+import { Plus, Trash2, Save, icons as LucideIcons } from "lucide-react";
 import { toast } from "sonner";
+import { SortableList } from "@/components/admin/SortableList";
 
 interface Skill {
   id: string;
