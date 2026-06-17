@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Save, GripVertical, icons as LucideIcons } from "lucide-react";
+import { Plus, Trash2, Save, icons as LucideIcons } from "lucide-react";
 import { toast } from "sonner";
+import { SortableList } from "@/components/admin/SortableList";
 
 interface Skill {
   id: string;
@@ -158,9 +159,15 @@ const AdminSkills = () => {
         </div>
       </div>
 
-      {/* Skills list per category */}
+      {/* Skills list per category — drag to reorder within a category */}
       {CATEGORIES.map(cat => {
         const catSkills = skills.filter(s => s.category === cat);
+        const setCatSkills = (next: Skill[]) => {
+          setSkills(prev => {
+            const others = prev.filter(s => s.category !== cat);
+            return [...others, ...next];
+          });
+        };
         return (
           <div key={cat}>
             <h2 className="text-sm font-display font-semibold text-primary uppercase tracking-wider mb-3">
@@ -169,10 +176,9 @@ const AdminSkills = () => {
             {catSkills.length === 0 ? (
               <p className="text-xs text-muted-foreground italic mb-2">No {cat.toLowerCase()} skills yet.</p>
             ) : (
-              <div className="space-y-2">
-                {catSkills.map(skill => (
-                  <div key={skill.id} className="flex items-center gap-3 bg-card border border-border rounded-lg px-4 py-3">
-                    <GripVertical size={16} className="text-muted-foreground shrink-0" />
+              <SortableList items={catSkills} setItems={setCatSkills} table="skills" layout="list">
+                {(skill) => (
+                  <div className="flex items-center gap-3 bg-card border border-border rounded-lg px-4 py-3">
                     <IconPreview name={skill.icon_name} size={18} />
                     <input
                       value={skill.name}
@@ -202,8 +208,8 @@ const AdminSkills = () => {
                       <Trash2 size={16} />
                     </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </SortableList>
             )}
           </div>
         );

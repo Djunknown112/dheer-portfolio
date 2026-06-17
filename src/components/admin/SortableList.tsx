@@ -27,7 +27,7 @@ type HasId = { id: string };
 interface SortableListProps<T extends HasId> {
   items: T[];
   setItems: (items: T[]) => void;
-  table: "projects" | "achievements" | "photos";
+  table: "projects" | "achievements" | "photos" | "skills" | "mentors";
   layout?: "list" | "grid";
   children: (item: T) => ReactNode;
   gridClassName?: string;
