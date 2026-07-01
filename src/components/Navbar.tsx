@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const navLinks = [
   { label: "About", href: "#about" },
@@ -12,10 +13,14 @@ const navLinks = [
   { label: "Documents", href: "#documents" },
   { label: "Contact", href: "#contact" },
   { label: "Reviews", href: "#reviews" },
+  { label: "Summary", href: "/summary" },
+  { label: "Chat", href: "/chat" },
 ];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
@@ -39,11 +44,21 @@ const Navbar = () => {
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setIsOpen(false);
-    const id = href.replace("#", "");
-    // Force every LazySection on the page to mount so layouts settle and
-    // anchor scrolling lands on the actual section (esp. on mobile).
-    window.dispatchEvent(new Event("lovable:preload-all"));
 
+    // Page route (e.g. /summary, /chat)
+    if (href.startsWith("/")) {
+      navigate(href);
+      return;
+    }
+
+    // Hash anchor
+    const id = href.replace("#", "");
+    if (location.pathname !== "/") {
+      navigate("/" + href);
+      return;
+    }
+
+    window.dispatchEvent(new Event("lovable:preload-all"));
     const scrollToTarget = () => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -51,11 +66,8 @@ const Navbar = () => {
       window.scrollTo({ top, behavior: "smooth" });
       history.replaceState(null, "", href);
     };
-
-    // Wait a frame so newly-mounted sections take up space before we measure.
     requestAnimationFrame(() => {
       requestAnimationFrame(scrollToTarget);
-      // Also re-correct after images/fonts likely settled.
       setTimeout(scrollToTarget, 250);
     });
   };

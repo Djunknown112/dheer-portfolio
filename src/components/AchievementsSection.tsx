@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { Trophy, Crown, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import ShowMoreLink from "@/components/ShowMoreLink";
 
 const iconMap: Record<string, React.ComponentType<any>> = { Trophy, Crown, Award };
 
@@ -11,18 +12,23 @@ const defaultAchievements = [
   { id: "3", icon_name: "Award", title: "Technology & Innovation Projects", description: "Active participation in technology competitions and innovation exhibitions, showcasing cutting-edge student projects.", photo_url: null },
 ];
 
-const AchievementsSection = () => {
+interface Props { limit?: number }
+
+const AchievementsSection = ({ limit }: Props) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [achievements, setAchievements] = useState(defaultAchievements);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase.from("achievements").select("*").order("sort_order");
       if (data && data.length > 0) setAchievements(data);
     };
-    fetch();
+    fetchData();
   }, []);
+
+  const visible = limit ? achievements.slice(0, limit) : achievements;
+  const hasMore = limit ? achievements.length > limit : false;
 
   return (
     <section id="achievements" className="section-padding" ref={ref}>
@@ -34,7 +40,7 @@ const AchievementsSection = () => {
           <div className="w-16 h-1 bg-primary mx-auto mb-10 rounded-full" />
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {achievements.map((a, i) => {
+            {visible.map((a, i) => {
               const Icon = iconMap[a.icon_name || "Trophy"] || Trophy;
               return (
                 <motion.div
@@ -57,6 +63,10 @@ const AchievementsSection = () => {
               );
             })}
           </div>
+
+          {hasMore && (
+            <ShowMoreLink to="/achievements" count={achievements.length - (limit ?? 0)} label="See all achievements" />
+          )}
         </motion.div>
       </div>
     </section>

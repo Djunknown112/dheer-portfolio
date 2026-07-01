@@ -198,9 +198,26 @@ const AdminAppearance = () => {
             <Palette size={16} className="text-primary" /> Hero Background
           </h2>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            The hero background is an auto-generated tech artwork that adapts to your color theme.
-            It updates automatically — no manual upload needed.
+            Auto-generated tech artwork behind your profile photo. Click below to generate a fresh one.
           </p>
+          <button
+            onClick={async () => {
+              const t = toast.loading("Generating new hero background... (30-60s)");
+              try {
+                const { data, error } = await supabase.functions.invoke("regenerate-hero-bg");
+                toast.dismiss(t);
+                if (error) throw error;
+                if ((data as any)?.error) throw new Error((data as any).error);
+                toast.success("New hero background live!");
+              } catch (err: any) {
+                toast.dismiss(t);
+                toast.error("Failed: " + (err.message || String(err)));
+              }
+            }}
+            className="w-full px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-display font-semibold hover:opacity-90"
+          >
+            Regenerate Hero Background
+          </button>
         </div>
 
       </div>

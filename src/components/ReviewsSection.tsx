@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
+import ShowMoreLink from "@/components/ShowMoreLink";
 
 interface Review {
   id: string;
@@ -16,8 +17,12 @@ interface Review {
   avatar_url?: string | null;
 }
 
-const ReviewsSection = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
+interface Props { limit?: number }
+
+const ReviewsSection = ({ limit }: Props) => {
+  const [allReviews, setAllReviews] = useState<Review[]>([]);
+  const reviews = limit ? allReviews.slice(0, limit) : allReviews;
+  const hasMore = limit ? allReviews.length > limit : false;
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [rating, setRating] = useState(5);
@@ -47,7 +52,7 @@ const ReviewsSection = () => {
 
   const fetchReviews = async () => {
     const { data } = await supabase.rpc("get_public_reviews");
-    if (data) setReviews(data as Review[]);
+    if (data) setAllReviews(data as Review[]);
   };
 
   const next = () => { setDirection(1); setIndex((i) => (i + 1) % reviews.length); };
@@ -207,6 +212,7 @@ const ReviewsSection = () => {
         ) : (
           <p className="text-center text-muted-foreground mb-16">No reviews yet. Be the first!</p>
         )}
+        {hasMore && <ShowMoreLink to="/reviews" count={allReviews.length - (limit ?? 0)} label="See all reviews" />}
 
         {/* Review Form */}
         <motion.div

@@ -5,13 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import MagneticButton from "@/components/MagneticButton";
 import heroBgAsset from "@/assets/hero-tech-bg.webp.asset.json";
 
-// Hero background is auto-generated, tech-themed, and shipped with the app.
-// It is *not* admin-editable — the admin panel intentionally has no control for it.
-const HERO_BG_URL = heroBgAsset.url;
+// Default hero bg ships with the app; admins can regenerate it any time and
+// the new URL is stored in site_content.hero_bg_url.
+const DEFAULT_HERO_BG_URL = heroBgAsset.url;
 
 const HeroSection = () => {
   const [profileImg, setProfileImg] = useState<string | null>(null);
   const [subtitle, setSubtitle] = useState("Young Innovator & Tech Builder");
+  const [heroBg, setHeroBg] = useState<string>(DEFAULT_HERO_BG_URL);
 
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -24,12 +25,13 @@ const HeroSection = () => {
       const { data } = await supabase
         .from("site_content")
         .select("key,value")
-        .in("key", ["profile_photo_url", "hero_subtitle"]);
+        .in("key", ["profile_photo_url", "hero_subtitle", "hero_bg_url"]);
       if (data) {
         const map: Record<string, string> = {};
         data.forEach((d) => { map[d.key] = d.value; });
         if (map["profile_photo_url"]) setProfileImg(map["profile_photo_url"]);
         if (map["hero_subtitle"]) setSubtitle(map["hero_subtitle"]);
+        if (map["hero_bg_url"]) setHeroBg(map["hero_bg_url"]);
       }
     };
     fetchContent();
@@ -42,10 +44,9 @@ const HeroSection = () => {
       ref={ref}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Parallax background — auto-generated tech artwork, themed */}
       <motion.div style={{ y: bgY }} className="absolute inset-0 will-change-transform">
         <img
-          src={HERO_BG_URL}
+          src={heroBg}
           alt=""
           width={1920}
           height={1080}
@@ -54,12 +55,10 @@ const HeroSection = () => {
           decoding="async"
           className="w-full h-[120%] object-cover opacity-90"
         />
-        {/* Theme tint overlay — picks up the primary color from the active theme */}
         <div
           className="absolute inset-0 mix-blend-screen opacity-30"
           style={{ background: "radial-gradient(circle at 30% 30%, hsl(var(--primary) / 0.4), transparent 65%)" }}
         />
-        {/* Subtle vignette so content stays readable without hiding the artwork */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background/85" />
       </motion.div>
 
@@ -67,7 +66,6 @@ const HeroSection = () => {
         style={{ y: contentY, opacity: contentOpacity }}
         className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center will-change-transform"
       >
-        {/* Profile photo */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -97,7 +95,6 @@ const HeroSection = () => {
           Student Innovator
         </motion.p>
 
-        {/* Animated name — word stagger reveal */}
         <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold text-foreground mb-4 leading-[1.05] flex justify-center flex-wrap gap-x-3 sm:gap-x-5">
           {nameWords.map((word, i) => (
             <span key={i} className="overflow-hidden inline-block pb-2">
@@ -148,7 +145,6 @@ const HeroSection = () => {
         </motion.div>
       </motion.div>
 
-      {/* Scroll indicator */}
       <motion.div
         animate={{ y: [0, 10, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}
