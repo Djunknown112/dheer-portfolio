@@ -35,37 +35,37 @@ const Index = () => {
 
       <LazySection id="projects" minHeight="600px">
         <Suspense fallback={<SectionFallback h="600px" />}>
-          <ProjectsSection />
+          <ProjectsSection limit={6} />
         </Suspense>
       </LazySection>
 
       <LazySection id="achievements" minHeight="500px">
         <Suspense fallback={<SectionFallback h="500px" />}>
-          <AchievementsSection />
+          <AchievementsSection limit={6} />
         </Suspense>
       </LazySection>
 
       <LazySection id="mentors" minHeight="400px">
         <Suspense fallback={<SectionFallback h="400px" />}>
-          <MentorsSection />
+          <MentorsSection limit={6} />
         </Suspense>
       </LazySection>
 
       <LazySection id="skills" minHeight="500px">
         <Suspense fallback={<SectionFallback h="500px" />}>
-          <SkillsSection />
+          <SkillsSection limit={6} />
         </Suspense>
       </LazySection>
 
       <LazySection id="documents" minHeight="400px">
         <Suspense fallback={<SectionFallback h="400px" />}>
-          <DocumentsSection />
+          <DocumentsSection limit={6} />
         </Suspense>
       </LazySection>
 
       <LazySection id="gallery" minHeight="600px">
         <Suspense fallback={<SectionFallback h="600px" />}>
-          <GallerySection />
+          <GallerySection limit={6} />
         </Suspense>
       </LazySection>
 
@@ -77,7 +77,7 @@ const Index = () => {
 
       <LazySection id="reviews" minHeight="400px">
         <Suspense fallback={<SectionFallback h="400px" />}>
-          <ReviewsSection />
+          <ReviewsSection limit={6} />
         </Suspense>
       </LazySection>
 

@@ -7,7 +7,6 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
 
-// Code-split everything except the landing page so the initial JS bundle stays small
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminResetPassword = lazy(() => import("./pages/AdminResetPassword"));
@@ -25,10 +24,20 @@ const AdminAboutHighlights = lazy(() => import("./pages/AdminAboutHighlights"));
 const AdminAppearance = lazy(() => import("./pages/AdminAppearance"));
 const AdminReviews = lazy(() => import("./pages/AdminReviews"));
 
+const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
+const AchievementsPage = lazy(() => import("./pages/AchievementsPage"));
+const MentorsPage = lazy(() => import("./pages/MentorsPage"));
+const SkillsPage = lazy(() => import("./pages/SkillsPage"));
+const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
+const ReviewsPage = lazy(() => import("./pages/ReviewsPage"));
+const SummaryPage = lazy(() => import("./pages/SummaryPage"));
+const ChatbotPage = lazy(() => import("./pages/ChatbotPage"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 min — return cached data instantly on revisit
+      staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,
     },
@@ -51,6 +60,16 @@ const App = () => (
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/projects" element={<ProjectsPage />} />
+              <Route path="/achievements" element={<AchievementsPage />} />
+              <Route path="/mentors" element={<MentorsPage />} />
+              <Route path="/skills" element={<SkillsPage />} />
+              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/documents" element={<DocumentsPage />} />
+              <Route path="/reviews" element={<ReviewsPage />} />
+              <Route path="/summary" element={<SummaryPage />} />
+              <Route path="/chat" element={<ChatbotPage />} />
+
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/reset-password" element={<AdminResetPassword />} />
               <Route path="/admin" element={<AdminLayout />}>
