@@ -30,6 +30,12 @@ const defaultProjects = [
   },
 ];
 
+const mergeWithDefaultProjects = (databaseProjects: typeof defaultProjects) => {
+  const projectsByTitle = new Map(databaseProjects.map((project) => [project.title.toLowerCase(), project]));
+  const missingDefaults = defaultProjects.filter((project) => !projectsByTitle.has(project.title.toLowerCase()));
+  return [...databaseProjects, ...missingDefaults];
+};
+
 const colorMap: Record<string, string> = {
   "emerald-500/20": "from-emerald-500/25 via-teal-500/15 to-cyan-500/25",
   "orange-500/20": "from-orange-500/25 via-amber-500/15 to-red-500/25",
@@ -44,8 +50,12 @@ const ProjectsSection = () => {
 
   useEffect(() => {
     const fetchProjects = async () => {
-      const { data } = await supabase.from("projects").select("*").order("sort_order");
-      if (data && data.length > 0) setProjects(data);
+      const { data } = await supabase
+        .from("projects")
+        .select("*")
+        .order("sort_order", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true });
+      if (data && data.length > 0) setProjects(mergeWithDefaultProjects(data));
     };
     fetchProjects();
   }, []);
