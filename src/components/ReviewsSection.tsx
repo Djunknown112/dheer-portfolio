@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
+import ShowMoreLink from "@/components/ShowMoreLink";
 
 interface Review {
   id: string;
@@ -16,8 +17,12 @@ interface Review {
   avatar_url?: string | null;
 }
 
-const ReviewsSection = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
+interface Props { limit?: number }
+
+const ReviewsSection = ({ limit }: Props) => {
+  const [allReviews, setAllReviews] = useState<Review[]>([]);
+  const reviews = limit ? allReviews.slice(0, limit) : allReviews;
+  const hasMore = limit ? allReviews.length > limit : false;
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [rating, setRating] = useState(5);
