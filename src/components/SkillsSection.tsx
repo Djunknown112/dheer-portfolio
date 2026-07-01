@@ -1,7 +1,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { icons, Cpu, ChevronDown, ChevronUp } from "lucide-react";
+import { icons, Cpu } from "lucide-react";
+import ShowMoreLink from "@/components/ShowMoreLink";
 
 interface Skill {
   id: string;
@@ -16,8 +17,6 @@ const getIcon = (iconName: string | null) => {
   return (icons as Record<string, any>)[iconName] || Cpu;
 };
 
-const PAGE_SIZE = 6;
-
 const CATEGORIES: { key: string; label: string; align: "left" | "center" | "right" }[] = [
   { key: "Technical", label: "Technical", align: "left" },
   { key: "Soft Skill", label: "Soft Skills", align: "center" },
@@ -29,16 +28,15 @@ const SkillColumn = ({
   label,
   isInView,
   align,
+  limit,
 }: {
   skills: Skill[];
   label: string;
   isInView: boolean;
   align: "left" | "center" | "right";
+  limit?: number;
 }) => {
-  const [showAll, setShowAll] = useState(false);
-  const visible = showAll ? skills : skills.slice(0, PAGE_SIZE);
-  const hasMore = skills.length > PAGE_SIZE;
-
+  const visible = limit ? skills.slice(0, limit) : skills;
   const xFrom = align === "left" ? -20 : align === "right" ? 20 : 0;
   const yFrom = align === "center" ? 20 : 0;
 
@@ -46,9 +44,7 @@ const SkillColumn = ({
 
   return (
     <div>
-      <h3 className="font-display text-sm tracking-wider text-primary uppercase mb-5">
-        {label}
-      </h3>
+      <h3 className="font-display text-sm tracking-wider text-primary uppercase mb-5">{label}</h3>
       <div className="space-y-3">
         {visible.map((s, i) => {
           const Icon = getIcon(s.icon_name);
@@ -65,51 +61,34 @@ const SkillColumn = ({
             </motion.div>
           );
         })}
-        {hasMore && (
-          <button
-            onClick={() => setShowAll((v) => !v)}
-            className="w-full flex items-center justify-center gap-1.5 mt-1 py-2 text-xs font-display font-semibold tracking-wider uppercase text-primary hover:text-primary/80 transition-colors"
-          >
-            {showAll ? (
-              <>
-                Show Less <ChevronUp size={14} />
-              </>
-            ) : (
-              <>
-                Show More ({skills.length - PAGE_SIZE}) <ChevronDown size={14} />
-              </>
-            )}
-          </button>
-        )}
       </div>
     </div>
   );
 };
 
-const SkillsSection = () => {
+interface Props { limit?: number }
+
+const SkillsSection = ({ limit }: Props) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [skills, setSkills] = useState<Skill[]>([]);
 
   useEffect(() => {
     const fetchSkills = async () => {
-      const { data } = await supabase
-        .from("skills")
-        .select("*")
-        .order("sort_order", { ascending: true });
+      const { data } = await supabase.from("skills").select("*").order("sort_order", { ascending: true });
       if (data) setSkills(data);
     };
     fetchSkills();
   }, []);
 
+  const hasOverflow = limit
+    ? CATEGORIES.some((c) => skills.filter((s) => s.category === c.key).length > limit)
+    : false;
+
   return (
     <section id="skills" className="section-padding bg-card/30" ref={ref}>
       <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 40 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <h2 className="font-display text-2xl sm:text-4xl font-bold text-foreground mb-2 text-center">
             Skills &amp; <span className="text-primary">Interests</span>
           </h2>
@@ -122,10 +101,15 @@ const SkillsSection = () => {
                 label={c.label}
                 align={c.align}
                 isInView={isInView}
+                limit={limit}
                 skills={skills.filter((s) => s.category === c.key)}
               />
             ))}
           </div>
+
+          {hasOverflow && (
+            <ShowMoreLink to="/skills" label="See all skills" />
+          )}
         </motion.div>
       </div>
     </section>

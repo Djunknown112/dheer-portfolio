@@ -2,6 +2,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { FileText, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import ShowMoreLink from "@/components/ShowMoreLink";
 
 const defaultDocs = [
   { id: "1", title: "Report Card – Class 9", category: "Report Cards", file_url: null },
@@ -10,24 +11,23 @@ const defaultDocs = [
   { id: "4", title: "Project Documentation", category: "Projects", file_url: null },
 ];
 
-const PAGE_SIZE = 4;
+interface Props { limit?: number }
 
-const DocumentsSection = () => {
+const DocumentsSection = ({ limit }: Props) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [documents, setDocuments] = useState(defaultDocs);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchDocs = async () => {
       const { data } = await supabase.from("documents").select("*").order("created_at", { ascending: false });
       if (data && data.length > 0) setDocuments(data);
     };
-    fetch();
+    fetchDocs();
   }, []);
 
-  const visibleDocs = documents.slice(0, visibleCount);
-  const hasMore = visibleCount < documents.length;
+  const visible = limit ? documents.slice(0, limit) : documents;
+  const hasMore = limit ? documents.length > limit : false;
 
   return (
     <section id="documents" className="section-padding" ref={ref}>
@@ -39,7 +39,7 @@ const DocumentsSection = () => {
           <div className="w-16 h-1 bg-primary mx-auto mb-10 rounded-full" />
 
           <div className="space-y-3">
-            {visibleDocs.map((doc, i) => (
+            {visible.map((doc, i) => (
               <motion.div
                 key={doc.id}
                 initial={{ opacity: 0, y: 15 }}
@@ -66,14 +66,7 @@ const DocumentsSection = () => {
           </div>
 
           {hasMore && (
-            <div className="flex justify-center mt-6">
-              <button
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                className="px-6 py-2.5 text-xs font-display font-semibold text-primary border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors"
-              >
-                Load More ({documents.length - visibleCount} left)
-              </button>
-            </div>
+            <ShowMoreLink to="/documents" count={documents.length - (limit ?? 0)} label="See all documents" />
           )}
         </motion.div>
       </div>
