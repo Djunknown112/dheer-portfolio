@@ -52,7 +52,7 @@ const ReviewsSection = ({ limit }: Props) => {
 
   const fetchReviews = async () => {
     const { data } = await supabase.rpc("get_public_reviews");
-    if (data) setReviews(data as Review[]);
+    if (data) setAllReviews(data as Review[]);
   };
 
   const next = () => { setDirection(1); setIndex((i) => (i + 1) % reviews.length); };
