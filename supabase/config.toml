@@ -1,1 +1,7 @@
 project_id = "omodvmlczvtotqdbsseu"
+
+[functions.send-contact-email]
+verify_jwt = false
+
+[functions.regenerate-hero-bg]
+verify_jwt = true
