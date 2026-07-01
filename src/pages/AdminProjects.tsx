@@ -25,7 +25,11 @@ const AdminProjects = () => {
   });
 
   const fetchProjects = async () => {
-    const { data } = await supabase.from("projects").select("*").order("sort_order");
+    const { data } = await supabase
+      .from("projects")
+      .select("*")
+      .order("sort_order", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true });
     if (data) setProjects(data);
   };
 
@@ -68,7 +72,15 @@ const AdminProjects = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("Project updated!");
     } else {
-      const { error } = await supabase.from("projects").insert(payload);
+      const { data: lastProject } = await supabase
+        .from("projects")
+        .select("sort_order")
+        .order("sort_order", { ascending: false, nullsFirst: false })
+        .limit(1)
+        .maybeSingle();
+      const nextSortOrder = (lastProject?.sort_order ?? projects.length - 1) + 1;
+
+      const { error } = await supabase.from("projects").insert({ ...payload, sort_order: nextSortOrder });
       if (error) { toast.error(error.message); return; }
       toast.success("Project created!");
     }
