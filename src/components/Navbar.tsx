@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const navLinks = [
   { label: "About", href: "#about" },
@@ -12,6 +13,8 @@ const navLinks = [
   { label: "Documents", href: "#documents" },
   { label: "Contact", href: "#contact" },
   { label: "Reviews", href: "#reviews" },
+  { label: "Summary", href: "/summary" },
+  { label: "Chat", href: "/chat" },
 ];
 
 const Navbar = () => {
