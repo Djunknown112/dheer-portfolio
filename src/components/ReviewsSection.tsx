@@ -212,6 +212,7 @@ const ReviewsSection = ({ limit }: Props) => {
         ) : (
           <p className="text-center text-muted-foreground mb-16">No reviews yet. Be the first!</p>
         )}
+        {hasMore && <ShowMoreLink to="/reviews" count={allReviews.length - (limit ?? 0)} label="See all reviews" />}
 
         {/* Review Form */}
         <motion.div
