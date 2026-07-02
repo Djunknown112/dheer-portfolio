@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { Trophy, Crown, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ShowMoreLink from "@/components/ShowMoreLink";
@@ -27,8 +27,13 @@ const AchievementsSection = ({ limit }: Props) => {
     fetchData();
   }, []);
 
-  const visible = limit ? achievements.slice(0, limit) : achievements;
-  const hasMore = limit ? achievements.length > limit : false;
+  // Group cards by similar description length so rows look uniform.
+  const sorted = useMemo(() => {
+    return [...achievements].sort((a, b) => (b.description?.length ?? 0) - (a.description?.length ?? 0));
+  }, [achievements]);
+
+  const visible = limit ? sorted.slice(0, limit) : sorted;
+  const hasMore = limit ? sorted.length > limit : false;
 
   return (
     <section id="achievements" className="section-padding" ref={ref}>
@@ -39,7 +44,7 @@ const AchievementsSection = ({ limit }: Props) => {
           </h2>
           <div className="w-16 h-1 bg-primary mx-auto mb-10 rounded-full" />
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
             {visible.map((a, i) => {
               const Icon = iconMap[a.icon_name || "Trophy"] || Trophy;
               return (
@@ -48,24 +53,36 @@ const AchievementsSection = ({ limit }: Props) => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: 0.15 * i }}
-                  className="bg-card border border-border rounded-xl p-6 hover:border-primary/40 hover:box-glow transition-all group text-center"
+                  className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:box-glow transition-all group flex flex-col h-full"
                 >
                   {a.photo_url ? (
-                    <img src={a.photo_url} alt={a.title} className="w-14 h-14 rounded-full object-cover mx-auto mb-4" />
+                    <div className="w-full aspect-[16/9] bg-muted overflow-hidden">
+                      <img
+                        src={a.photo_url}
+                        alt={a.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                      <Icon className="text-primary" size={26} />
+                    <div className="w-full aspect-[16/9] bg-primary/5 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center">
+                        <Icon className="text-primary" size={30} />
+                      </div>
                     </div>
                   )}
-                  <h3 className="font-display text-sm font-bold text-foreground mb-2">{a.title}</h3>
-                  <p className="text-xs text-muted-foreground font-body leading-relaxed">{a.description}</p>
+                  <div className="p-5 sm:p-6 text-center flex flex-col flex-1">
+                    <h3 className="font-display text-sm font-bold text-foreground mb-2">{a.title}</h3>
+                    <p className="text-xs text-muted-foreground font-body leading-relaxed">{a.description}</p>
+                  </div>
                 </motion.div>
               );
             })}
           </div>
 
           {hasMore && (
-            <ShowMoreLink to="/achievements" count={achievements.length - (limit ?? 0)} label="See all achievements" />
+            <ShowMoreLink to="/achievements" count={sorted.length - (limit ?? 0)} label="See all achievements" />
           )}
         </motion.div>
       </div>
