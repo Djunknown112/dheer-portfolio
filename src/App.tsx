@@ -2,10 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "@/hooks/useAuth";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
+import PageTransition from "@/components/PageTransition";
 
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
@@ -50,6 +52,47 @@ const RouteFallback = () => (
   </div>
 );
 
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  const wrap = (el: JSX.Element) => <PageTransition>{el}</PageTransition>;
+  return (
+    <AnimatePresence mode="wait">
+      <Suspense key={location.pathname} fallback={<RouteFallback />}>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={wrap(<Index />)} />
+          <Route path="/projects" element={wrap(<ProjectsPage />)} />
+          <Route path="/achievements" element={wrap(<AchievementsPage />)} />
+          <Route path="/mentors" element={wrap(<MentorsPage />)} />
+          <Route path="/skills" element={wrap(<SkillsPage />)} />
+          <Route path="/gallery" element={wrap(<GalleryPage />)} />
+          <Route path="/documents" element={wrap(<DocumentsPage />)} />
+          <Route path="/reviews" element={wrap(<ReviewsPage />)} />
+          <Route path="/summary" element={wrap(<SummaryPage />)} />
+          <Route path="/chat" element={wrap(<ChatbotPage />)} />
+
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="projects" element={<AdminProjects />} />
+            <Route path="achievements" element={<AdminAchievements />} />
+            <Route path="mentors" element={<AdminMentors />} />
+            <Route path="documents" element={<AdminDocuments />} />
+            <Route path="photos" element={<AdminPhotos />} />
+            <Route path="content" element={<AdminContent />} />
+            <Route path="skills" element={<AdminSkills />} />
+            <Route path="messages" element={<AdminMessages />} />
+            <Route path="about-highlights" element={<AdminAboutHighlights />} />
+            <Route path="appearance" element={<AdminAppearance />} />
+            <Route path="reviews" element={<AdminReviews />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </AnimatePresence>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -57,38 +100,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Suspense fallback={<RouteFallback />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/projects" element={<ProjectsPage />} />
-              <Route path="/achievements" element={<AchievementsPage />} />
-              <Route path="/mentors" element={<MentorsPage />} />
-              <Route path="/skills" element={<SkillsPage />} />
-              <Route path="/gallery" element={<GalleryPage />} />
-              <Route path="/documents" element={<DocumentsPage />} />
-              <Route path="/reviews" element={<ReviewsPage />} />
-              <Route path="/summary" element={<SummaryPage />} />
-              <Route path="/chat" element={<ChatbotPage />} />
-
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/reset-password" element={<AdminResetPassword />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="projects" element={<AdminProjects />} />
-                <Route path="achievements" element={<AdminAchievements />} />
-                <Route path="mentors" element={<AdminMentors />} />
-                <Route path="documents" element={<AdminDocuments />} />
-                <Route path="photos" element={<AdminPhotos />} />
-                <Route path="content" element={<AdminContent />} />
-                <Route path="skills" element={<AdminSkills />} />
-                <Route path="messages" element={<AdminMessages />} />
-                <Route path="about-highlights" element={<AdminAboutHighlights />} />
-                <Route path="appearance" element={<AdminAppearance />} />
-                <Route path="reviews" element={<AdminReviews />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+          <AnimatedRoutes />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
