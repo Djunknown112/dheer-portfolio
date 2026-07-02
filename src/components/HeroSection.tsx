@@ -9,16 +9,28 @@ import heroBgAsset from "@/assets/hero-tech-bg.webp.asset.json";
 // the new URL is stored in site_content.hero_bg_url.
 const DEFAULT_HERO_BG_URL = heroBgAsset.url;
 
+const CACHE_KEYS = {
+  profile: "cache:profile_photo_url",
+  subtitle: "cache:hero_subtitle",
+  bg: "cache:hero_bg_url",
+};
+
 const HeroSection = () => {
-  const [profileImg, setProfileImg] = useState<string | null>(null);
-  const [subtitle, setSubtitle] = useState("Young Innovator & Tech Builder");
-  const [heroBg, setHeroBg] = useState<string>(DEFAULT_HERO_BG_URL);
+  const [profileImg, setProfileImg] = useState<string | null>(
+    () => (typeof window !== "undefined" ? localStorage.getItem(CACHE_KEYS.profile) : null)
+  );
+  const [subtitle, setSubtitle] = useState(
+    () => (typeof window !== "undefined" && localStorage.getItem(CACHE_KEYS.subtitle)) || "Young Innovator & Tech Builder"
+  );
+  const [heroBg, setHeroBg] = useState<string>(
+    () => (typeof window !== "undefined" && localStorage.getItem(CACHE_KEYS.bg)) || DEFAULT_HERO_BG_URL
+  );
 
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  // Lighter parallax = smoother scroll on lower-end devices.
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -29,9 +41,9 @@ const HeroSection = () => {
       if (data) {
         const map: Record<string, string> = {};
         data.forEach((d) => { map[d.key] = d.value; });
-        if (map["profile_photo_url"]) setProfileImg(map["profile_photo_url"]);
-        if (map["hero_subtitle"]) setSubtitle(map["hero_subtitle"]);
-        if (map["hero_bg_url"]) setHeroBg(map["hero_bg_url"]);
+        if (map["profile_photo_url"]) { setProfileImg(map["profile_photo_url"]); localStorage.setItem(CACHE_KEYS.profile, map["profile_photo_url"]); }
+        if (map["hero_subtitle"]) { setSubtitle(map["hero_subtitle"]); localStorage.setItem(CACHE_KEYS.subtitle, map["hero_subtitle"]); }
+        if (map["hero_bg_url"]) { setHeroBg(map["hero_bg_url"]); localStorage.setItem(CACHE_KEYS.bg, map["hero_bg_url"]); }
       }
     };
     fetchContent();
