@@ -81,7 +81,6 @@ const ReviewsSection = ({ limit }: Props) => {
     }
     const meta = (user.user_metadata ?? {}) as Record<string, any>;
     const name = meta.full_name || meta.name || user.email?.split("@")[0] || "Anonymous";
-    const avatar_url = meta.avatar_url || meta.picture || null;
 
     setSubmitting(true);
     const { error } = await supabase.from("reviews").insert({
@@ -89,7 +88,7 @@ const ReviewsSection = ({ limit }: Props) => {
       email: user.email ?? "",
       rating,
       message: message.trim(),
-      avatar_url,
+      avatar_url: null,
       user_id: user.id,
     });
     setSubmitting(false);
