@@ -75,7 +75,7 @@ const HeroSection = () => {
       </motion.div>
 
       <motion.div
-        style={{ y: contentY, opacity: contentOpacity }}
+        style={{ opacity: contentOpacity }}
         className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center will-change-transform"
       >
         <motion.div
