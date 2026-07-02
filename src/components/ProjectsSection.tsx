@@ -136,6 +136,18 @@ const ProjectsSection = ({ limit }: Props) => {
             >
               <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-card/60 backdrop-blur-sm -z-10" />
 
+              {(project as any).banner_image_url && (
+                <div className="mb-6 sm:mb-8 -mx-1 rounded-xl overflow-hidden border border-primary/20 aspect-[21/9] bg-muted">
+                  <img
+                    src={(project as any).banner_image_url}
+                    alt={`${project.title} banner`}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
               <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
