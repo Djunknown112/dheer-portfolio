@@ -231,6 +231,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          banner_image_url: string | null
           category: string | null
           color_from: string | null
           color_to: string | null
@@ -247,6 +248,7 @@ export type Database = {
           youtube_link: string | null
         }
         Insert: {
+          banner_image_url?: string | null
           category?: string | null
           color_from?: string | null
           color_to?: string | null
@@ -263,6 +265,7 @@ export type Database = {
           youtube_link?: string | null
         }
         Update: {
+          banner_image_url?: string | null
           category?: string | null
           color_from?: string | null
           color_to?: string | null
