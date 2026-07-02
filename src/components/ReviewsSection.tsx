@@ -137,20 +137,9 @@ const ReviewsSection = ({ limit }: Props) => {
                 >
                   <img
                     key={current.id}
-                    src={
-                      current.avatar_url ||
-                      (current.avatar_hash
-                        ? `https://www.gravatar.com/avatar/${current.avatar_hash}?s=160&d=404`
-                        : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear&backgroundColor=00897b,1e88e5,5e35b1,8e24aa,d81b60,f4511e`)
-                    }
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      const fallback = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear&backgroundColor=00897b,1e88e5,5e35b1,8e24aa,d81b60,f4511e`;
-                      if (img.src !== fallback) img.src = fallback;
-                    }}
+                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.name)}&backgroundType=gradientLinear&backgroundColor=00897b,1e88e5,5e35b1,8e24aa,d81b60,f4511e`}
                     alt={`${current.name}`}
                     loading="lazy"
-                    referrerPolicy="no-referrer"
                     className="absolute top-4 right-4 w-11 h-11 rounded-full border-2 border-primary/40 object-cover bg-muted shadow-md"
                   />
                   <div className="space-y-3 pr-12">
