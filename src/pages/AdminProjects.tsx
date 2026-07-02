@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { SortableList } from "@/components/admin/SortableList";
+import { enhanceImage } from "@/lib/imageEnhance";
 
 type Project = {
   id: string;
@@ -14,6 +15,7 @@ type Project = {
   website_link: string | null;
   category: string | null;
   sort_order: number | null;
+  banner_image_url: string | null;
 };
 
 const AdminProjects = () => {
@@ -23,6 +25,7 @@ const AdminProjects = () => {
   const [form, setForm] = useState({
     title: "", description: "", features: "", technologies: "", youtube_link: "", website_link: "", category: ""
   });
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
 
   const fetchProjects = async () => {
     const { data } = await supabase
@@ -30,7 +33,7 @@ const AdminProjects = () => {
       .select("*")
       .order("sort_order", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: true });
-    if (data) setProjects(data);
+    if (data) setProjects(data as Project[]);
   };
 
   useEffect(() => { fetchProjects(); }, []);
@@ -38,6 +41,7 @@ const AdminProjects = () => {
   const openNew = () => {
     setEditing(null);
     setForm({ title: "", description: "", features: "", technologies: "", youtube_link: "", website_link: "", category: "" });
+    setBannerFile(null);
     setShowForm(true);
   };
 
@@ -52,11 +56,26 @@ const AdminProjects = () => {
       website_link: p.website_link || "",
       category: p.category || "",
     });
+    setBannerFile(null);
     setShowForm(true);
+  };
+
+  const uploadBanner = async (rawFile: File) => {
+    const file = await enhanceImage(rawFile);
+    const path = `project-banners/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("gallery").upload(path, file);
+    if (error) throw error;
+    const { data } = supabase.storage.from("gallery").getPublicUrl(path);
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let banner_image_url: string | null = editing?.banner_image_url || null;
+    if (bannerFile) {
+      try { banner_image_url = await uploadBanner(bannerFile); }
+      catch { toast.error("Banner upload failed"); return; }
+    }
     const payload = {
       title: form.title,
       description: form.description,
@@ -65,6 +84,7 @@ const AdminProjects = () => {
       youtube_link: form.youtube_link || null,
       website_link: form.website_link || null,
       category: form.category || null,
+      banner_image_url,
     };
 
     if (editing) {
@@ -104,7 +124,6 @@ const AdminProjects = () => {
         </button>
       </div>
 
-      {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 bg-background/80 z-50 flex items-start justify-center pt-20 px-4 overflow-auto">
           <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg relative">
@@ -122,6 +141,13 @@ const AdminProjects = () => {
               <input placeholder="YouTube Link (optional)" value={form.youtube_link} onChange={e => setForm({...form, youtube_link: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" />
               <input placeholder="Project Website Link (optional)" value={form.website_link} onChange={e => setForm({...form, website_link: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" />
               <input placeholder="Category" value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary" />
+              <div>
+                <label className="text-xs text-muted-foreground">Banner image (shown at top of the project card)</label>
+                <input type="file" accept="image/*" onChange={e => setBannerFile(e.target.files?.[0] || null)} className="w-full text-sm text-foreground mt-1" />
+                {editing?.banner_image_url && !bannerFile && (
+                  <img src={editing.banner_image_url} alt="current banner" className="mt-2 w-full aspect-[21/9] object-cover rounded-lg border border-border" />
+                )}
+              </div>
               <button type="submit" className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-display font-semibold hover:opacity-90">
                 {editing ? "Update" : "Create"}
               </button>
@@ -130,7 +156,6 @@ const AdminProjects = () => {
         </div>
       )}
 
-      {/* Project list */}
       {projects.length === 0 ? (
         <p className="text-sm text-muted-foreground">No projects yet. Add your first one!</p>
       ) : (
@@ -139,9 +164,12 @@ const AdminProjects = () => {
           <SortableList items={projects} setItems={setProjects} table="projects">
             {(p) => (
               <div className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground">{p.title}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
+                <div className="flex items-center gap-3 min-w-0">
+                  {p.banner_image_url && <img src={p.banner_image_url} alt="" className="w-16 h-10 rounded object-cover flex-shrink-0" />}
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold text-foreground truncate">{p.title}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => openEdit(p)} className="p-2 text-muted-foreground hover:text-primary"><Pencil size={16} /></button>

@@ -39,7 +39,15 @@ const LazySection = ({ children, minHeight = "400px", rootMargin = "300px", id }
   }, []);
 
   return (
-    <div id={id} ref={ref} style={!visible ? { minHeight } : undefined}>
+    <div
+      id={id}
+      ref={ref}
+      style={
+        !visible
+          ? { minHeight, contentVisibility: "auto" as any, containIntrinsicSize: `1px ${minHeight}` }
+          : undefined
+      }
+    >
       {visible ? children : null}
     </div>
   );
