@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import SectionPageShell from "@/components/SectionPageShell";
+import PageHead from "@/components/PageHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Bot, Send, User } from "lucide-react";
 
