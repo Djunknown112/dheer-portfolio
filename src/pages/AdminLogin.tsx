@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Lock, Mail } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -26,6 +27,15 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <Helmet>
+        <title>Admin Login — Dheer Joshi Portfolio</title>
+        <meta name="description" content="Restricted admin sign-in for the Dheer Joshi Portfolio content management system." />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://dheer-portfolio.lovable.app/admin/login" />
+        <meta property="og:title" content="Admin Login — Dheer Joshi Portfolio" />
+        <meta property="og:description" content="Restricted admin sign-in." />
+        <meta property="og:url" content="https://dheer-portfolio.lovable.app/admin/login" />
+      </Helmet>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="font-display text-2xl font-bold text-primary text-glow">Portfolio</h1>
