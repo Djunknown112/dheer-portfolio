@@ -48,6 +48,7 @@ const SummaryPage = () => {
 
   return (
     <SectionPageShell>
+      <PageHead title="Summary — Dheer Joshi" description="A one-page recap of Dheer Joshi's projects, mentors, achievements, and skills." path="/summary" />
       <section className="section-padding">
         <div className="max-w-6xl mx-auto">
           <h1 className="font-display text-3xl sm:text-5xl font-bold text-center mb-2">
