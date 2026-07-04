@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import SectionPageShell from "@/components/SectionPageShell";
+import PageHead from "@/components/PageHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Briefcase, Trophy, Users, Wrench, Image as ImageIcon, FileText, MessageSquare } from "lucide-react";

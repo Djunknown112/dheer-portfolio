@@ -30,6 +30,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageHead
+        title="Dheer Joshi — Young Innovator & Tech Builder | Portfolio"
+        description="Portfolio of Dheer Joshi (Vadodara, India) — student innovator building AI & IoT projects like WildSentry, EV Armour, and Ric."
+        path="/"
+      />
       <Navbar />
       <HeroSection />
       <AboutSection />
