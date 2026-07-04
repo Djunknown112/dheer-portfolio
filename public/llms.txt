@@ -1,0 +1,22 @@
+# Dheer Joshi — Portfolio
+
+> Portfolio of Dheer Joshi, a young innovator from Vadodara, India building AI and IoT projects including WildSentry, EV Armour, and Ric.
+
+Dheer Joshi is a student innovator focused on solving real-world problems through IoT, artificial intelligence, robotics, and engineering. This site collects his projects, achievements, skills, mentors, academic documents, and reviews.
+
+## Pages
+
+- [Home](/): Overview of Dheer Joshi with hero intro, about, and highlights across all sections.
+- [Projects](/projects): Full list of engineering and AI/IoT projects including WildSentry, EV Armour, and Ric.
+- [Achievements](/achievements): Awards, recognitions, and competition results.
+- [Mentors](/mentors): People who have guided Dheer's technical and academic journey.
+- [Skills](/skills): Technical and soft skills across hardware, software, and AI.
+- [Gallery](/gallery): Photos from events, builds, and demonstrations.
+- [Documents](/documents): Academic marksheets and certificates.
+- [Reviews](/reviews): Public reviews and testimonials.
+- [Summary](/summary): One-page recap combining projects, mentors, achievements, and skills.
+- [Chat](/chat): Rule-based chatbot that answers questions about Dheer using site content.
+
+## Optional
+
+- [Contact](/#contact): Email and social links to reach Dheer.

@@ -15,4 +15,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://dheer-portfolio.vercel.app/sitemap.xml
+Sitemap: https://dheer-portfolio.lovable.app/sitemap.xml
