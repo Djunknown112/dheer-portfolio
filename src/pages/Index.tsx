@@ -5,6 +5,7 @@ import { useThemeLoader } from "@/hooks/useTheme";
 import AboutSection from "@/components/AboutSection";
 import LazySection from "@/components/LazySection";
 import Footer from "@/components/Footer";
+import PageHead from "@/components/PageHead";
 
 // Code-split below-the-fold sections so they don't ship in the initial bundle
 const ProjectsSection = lazy(() => import("@/components/ProjectsSection"));
@@ -29,6 +30,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageHead
+        title="Dheer Joshi — Young Innovator & Tech Builder | Portfolio"
+        description="Portfolio of Dheer Joshi (Vadodara, India) — student innovator building AI & IoT projects like WildSentry, EV Armour, and Ric."
+        path="/"
+      />
       <Navbar />
       <HeroSection />
       <AboutSection />
