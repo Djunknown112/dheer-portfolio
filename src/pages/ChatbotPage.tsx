@@ -79,6 +79,7 @@ const ChatbotPage = () => {
 
   return (
     <SectionPageShell>
+      <PageHead title="Chat about Dheer Joshi — Rule-based Bot" description="Ask a simple rule-based chatbot about Dheer Joshi's projects, mentors, achievements, and skills." path="/chat" />
       <section className="section-padding">
         <div className="max-w-3xl mx-auto">
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-center mb-2">
