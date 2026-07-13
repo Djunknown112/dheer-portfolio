@@ -27,6 +27,8 @@ const AdminAppearance = lazy(() => import("./pages/AdminAppearance"));
 const AdminReviews = lazy(() => import("./pages/AdminReviews"));
 
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
+const FunProjectsPage = lazy(() => import("./pages/FunProjectsPage"));
+const AdminFunProjects = lazy(() => import("./pages/AdminFunProjects"));
 const AchievementsPage = lazy(() => import("./pages/AchievementsPage"));
 const MentorsPage = lazy(() => import("./pages/MentorsPage"));
 const SkillsPage = lazy(() => import("./pages/SkillsPage"));
@@ -61,6 +63,7 @@ const AnimatedRoutes = () => {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={wrap(<Index />)} />
           <Route path="/projects" element={wrap(<ProjectsPage />)} />
+          <Route path="/fun-projects" element={wrap(<FunProjectsPage />)} />
           <Route path="/achievements" element={wrap(<AchievementsPage />)} />
           <Route path="/mentors" element={wrap(<MentorsPage />)} />
           <Route path="/skills" element={wrap(<SkillsPage />)} />
@@ -75,6 +78,7 @@ const AnimatedRoutes = () => {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="projects" element={<AdminProjects />} />
+            <Route path="fun-projects" element={<AdminFunProjects />} />
             <Route path="achievements" element={<AdminAchievements />} />
             <Route path="mentors" element={<AdminMentors />} />
             <Route path="documents" element={<AdminDocuments />} />

@@ -9,6 +9,7 @@ import PageHead from "@/components/PageHead";
 
 // Code-split below-the-fold sections so they don't ship in the initial bundle
 const ProjectsSection = lazy(() => import("@/components/ProjectsSection"));
+const FunProjectsSection = lazy(() => import("@/components/FunProjectsSection"));
 const AchievementsSection = lazy(() => import("@/components/AchievementsSection"));
 const MentorsSection = lazy(() => import("@/components/MentorsSection"));
 const SkillsSection = lazy(() => import("@/components/SkillsSection"));
@@ -42,6 +43,12 @@ const Index = () => {
       <LazySection id="projects" minHeight="600px">
         <Suspense fallback={<SectionFallback h="600px" />}>
           <ProjectsSection limit={6} />
+        </Suspense>
+      </LazySection>
+
+      <LazySection id="fun-projects" minHeight="300px">
+        <Suspense fallback={<SectionFallback h="300px" />}>
+          <FunProjectsSection limit={6} />
         </Suspense>
       </LazySection>
 
