@@ -37,36 +37,70 @@ const ChatbotPage = () => {
   const strip = (html: string) => html.replace(/<[^>]+>/g, "");
 
   const answer = (q: string): string => {
-    const t = q.toLowerCase().trim();
-    if (!t) return "Please type a question.";
-    if (/\b(hi|hello|hey|namaste)\b/.test(t)) return "Hey there! Ask me anything about Dheer's projects, mentors, or achievements.";
-    if (/who|about|yourself|dheer/.test(t)) {
-      const p = data.content.about_paragraph_1 || "I'm Dheer Joshi — a Class 10 student innovator from Vadodara building AI + IoT projects.";
-      return strip(p);
+    const t = ` ${q.toLowerCase().trim()} `;
+    if (!t.trim()) return "Please type a question.";
+
+    // Score each intent by keyword hits so the strongest topic wins,
+    // instead of the first regex accidentally swallowing the query.
+    const has = (words: string[]) =>
+      words.reduce((n, w) => n + (new RegExp(`\\b${w}\\b`).test(t) ? 1 : 0), 0);
+
+    const scores = {
+      greet: has(["hi", "hello", "hey", "namaste", "yo"]),
+      projects: has(["project", "projects", "build", "built", "made", "wildsentry", "ev", "armour", "ric", "pendant", "iot", "summary", "smart"]),
+      mentors: has(["mentor", "mentors", "guide", "teacher", "teachers"]),
+      achievements: has(["achievement", "achievements", "award", "awards", "won", "prize", "head", "boy", "kidovation"]),
+      skills: has(["skill", "skills", "know", "learning", "technology", "tech", "languages", "stack"]),
+      contact: has(["contact", "email", "reach", "hire", "phone", "message"]),
+      education: has(["school", "study", "class", "education", "grade", "cbse", "college"]),
+      goal: has(["goal", "future", "dream", "career", "ambition"]),
+      about: has(["who", "about", "yourself", "dheer", "bio", "introduce", "introduction"]),
+      thanks: has(["thank", "thanks", "thx"]),
+    };
+
+    const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+    if (!best || best[1] === 0) {
+      return "I can answer about his projects, mentors, achievements, skills, education, goals or contact. Try: 'Give me a summary of every project'.";
     }
-    if (/project|build|built|wildsentry|ev armour|ric/.test(t)) {
-      if (data.projects.length === 0) return "Projects include WildSentry, EV Armour, and Ric — an AI IoT pendant.";
-      return "Projects:\n" + data.projects.map((p: any) => `• ${p.title} — ${(p.description || "").slice(0, 100)}`).join("\n");
+
+    switch (best[0]) {
+      case "greet":
+        return "Hey! Ask me about Dheer's projects, mentors, achievements or skills.";
+      case "projects": {
+        if (data.projects.length === 0) return "Projects include WildSentry, EV Armour, and Ric — an AI IoT pendant.";
+        return "Here are all of his projects:\n\n" + data.projects.map((p: any, i: number) => {
+          const desc = strip(p.description || "").trim();
+          const tech = p.tech_stack ? `\n   Tech: ${Array.isArray(p.tech_stack) ? p.tech_stack.join(", ") : p.tech_stack}` : "";
+          return `${i + 1}. ${p.title}\n   ${desc}${tech}`;
+        }).join("\n\n");
+      }
+      case "mentors":
+        if (data.mentors.length === 0) return "Mentor list isn't set up yet.";
+        return "Mentors:\n" + data.mentors.map((m: any) => `• ${m.name}${m.description ? " — " + m.description : ""}`).join("\n");
+      case "achievements":
+        if (data.achievements.length === 0) return "Notable: Head Boy of school, Kidovation Innovation Award.";
+        return "Achievements:\n" + data.achievements.map((a: any) => `• ${a.title} — ${a.description}`).join("\n");
+      case "skills": {
+        if (data.skills.length === 0) return "Skills: AI/ML, IoT, Arduino, Python, JavaScript, leadership.";
+        const byCat: Record<string, string[]> = {};
+        data.skills.forEach((s: any) => { (byCat[s.category] ||= []).push(s.name); });
+        return Object.entries(byCat).map(([k, v]) => `${k}: ${v.join(", ")}`).join("\n");
+      }
+      case "contact":
+        return "Use the Contact section on the home page — a phone number is required to send a message.";
+      case "education":
+        return "Dheer is a CBSE student from Vadodara, India, and plans to pursue B.Tech in Computer Science Engineering.";
+      case "goal":
+        return "Goal: pursue B.Tech CSE and build technologies that make the world safer and smarter.";
+      case "about": {
+        const p = data.content.about_paragraph_1 || "I'm Dheer Joshi — a student innovator from Vadodara building AI + IoT projects.";
+        return strip(p);
+      }
+      case "thanks":
+        return "You're welcome!";
+      default:
+        return "Try asking about projects, mentors, achievements or skills.";
     }
-    if (/mentor|guide|teacher/.test(t)) {
-      if (data.mentors.length === 0) return "Mentor list isn't set up yet.";
-      return "Mentors:\n" + data.mentors.map((m: any) => `• ${m.name}${m.description ? " — " + m.description : ""}`).join("\n");
-    }
-    if (/achievement|award|won|head boy|kidovation/.test(t)) {
-      if (data.achievements.length === 0) return "Notable: Head Boy of school, Kidovation Innovation Award.";
-      return "Achievements:\n" + data.achievements.map((a: any) => `• ${a.title} — ${a.description}`).join("\n");
-    }
-    if (/skill|know|good at|technology|tech/.test(t)) {
-      if (data.skills.length === 0) return "Skills: AI/ML, IoT, Arduino, Python, JavaScript, leadership.";
-      const byCat: Record<string, string[]> = {};
-      data.skills.forEach((s: any) => { (byCat[s.category] ||= []).push(s.name); });
-      return Object.entries(byCat).map(([k, v]) => `${k}: ${v.join(", ")}`).join("\n");
-    }
-    if (/contact|email|reach|hire/.test(t)) return "Use the Contact section on the home page to send a message.";
-    if (/school|study|class|education/.test(t)) return "Dheer is currently in Class 10 (CBSE) from Vadodara, India, and plans to pursue B.Tech in Computer Science Engineering.";
-    if (/goal|future|dream|career/.test(t)) return "Goal: pursue B.Tech CSE and build technologies that make the world safer and smarter.";
-    if (/thank|thanks/.test(t)) return "You're welcome!";
-    return "I'm a small rule-based bot — I can answer questions about projects, mentors, achievements, skills, education, or how to contact Dheer.";
   };
 
   const send = (text: string) => {
