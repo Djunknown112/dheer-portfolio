@@ -1,6 +1,6 @@
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { Users } from "lucide-react";
+import { Users, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ShowMoreLink from "@/components/ShowMoreLink";
 
@@ -18,6 +18,7 @@ const MentorsSection = ({ limit }: Props) => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [selected, setSelected] = useState<Mentor | null>(null);
 
   useEffect(() => {
     const fetchMentors = async () => {
@@ -44,7 +45,7 @@ const MentorsSection = ({ limit }: Props) => {
           </h2>
           <div className="w-16 h-1 bg-primary mx-auto mb-4 rounded-full" />
           <p className="text-center text-sm text-muted-foreground max-w-xl mx-auto mb-10">
-            The people who guide, challenge, and inspire me along the way.
+            The people who guide, challenge, and inspire me along the way. Tap a photo to view it full size.
           </p>
 
           {!loaded ? (
@@ -64,7 +65,20 @@ const MentorsSection = ({ limit }: Props) => {
                   className="bg-card border border-border rounded-xl p-6 hover:border-primary/40 hover:box-glow transition-all text-center"
                 >
                   {m.photo_url ? (
-                    <img src={m.photo_url} alt={m.name} loading="lazy" decoding="async" className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-2 border-primary/40" />
+                    <button
+                      type="button"
+                      onClick={() => setSelected(m)}
+                      aria-label={`View full photo of ${m.name}`}
+                      className="block mx-auto mb-4 cursor-zoom-in group focus:outline-none"
+                    >
+                      <img
+                        src={m.photo_url}
+                        alt={m.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-24 h-24 rounded-full object-cover border-2 border-primary/40 group-hover:border-primary transition-all group-hover:scale-105"
+                      />
+                    </button>
                   ) : (
                     <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <Users className="text-primary" size={32} />
@@ -86,6 +100,41 @@ const MentorsSection = ({ limit }: Props) => {
           )}
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelected(null)}
+            className="fixed inset-0 z-50 bg-background/90 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <button onClick={() => setSelected(null)} className="absolute top-6 right-6 text-foreground hover:text-primary" aria-label="Close">
+              <X size={28} />
+            </button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="flex flex-col items-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {selected.photo_url && (
+                <img
+                  src={selected.photo_url}
+                  alt={selected.name}
+                  className="max-w-[80vw] max-h-[75vh] rounded-xl object-contain"
+                />
+              )}
+              <h3 className="font-display text-lg font-bold text-foreground mt-4">{selected.name}</h3>
+              {selected.description && (
+                <p className="text-xs text-muted-foreground max-w-md text-center mt-1 whitespace-pre-line">{selected.description}</p>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
