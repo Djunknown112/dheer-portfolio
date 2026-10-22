@@ -7,7 +7,7 @@ interface PageHeadProps {
   noindex?: boolean;
 }
 
-const SITE = "https://dheer-portfolio.lovable.app";
+const SITE = "https://dheer-portfolio.vercel.app";
 
 /** Per-route <title>, description, canonical, and og:* tags. */
 const PageHead = ({ title, description, path, noindex }: PageHeadProps) => {

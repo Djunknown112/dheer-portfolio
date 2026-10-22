@@ -6,27 +6,33 @@ import { Bot, Send, User } from "lucide-react";
 
 type Msg = { role: "bot" | "user"; text: string };
 
-/** Simple rule-based chatbot. No AI models — pure keyword matching against site data. */
+const CONTACT_LINE = "You can reach Dheer directly at dheerjoshi2606@gmail.com or through the Contact section on the home page.";
+
+const NOT_ON_SITE = `That's not something I have on the portfolio yet. ${CONTACT_LINE}
+If he has built it, he may simply not have updated the portfolio — he'd be happy to tell you about it himself!`;
+
+/** Rule-based chatbot. No AI models — pure keyword matching against site data. */
 const ChatbotPage = () => {
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "bot", text: "Hi! I'm a simple bot that knows about Dheer. Ask me about his projects, mentors, achievements, skills, or try one of the suggestions below." },
+    { role: "bot", text: "Hi! I know everything on Dheer's portfolio — his projects, mentors, achievements, skills, education, goals and how to reach him. Ask me anything, or tap a suggestion below." },
   ]);
   const [input, setInput] = useState("");
-  const [data, setData] = useState<any>({ projects: [], achievements: [], mentors: [], skills: [], content: {} });
+  const [data, setData] = useState<any>({ projects: [], achievements: [], mentors: [], skills: [], funProjects: [], content: {} });
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
-      const [p, a, m, s, sc] = await Promise.all([
+      const [p, a, m, s, f, sc] = await Promise.all([
         supabase.from("projects").select("*"),
         supabase.from("achievements").select("*"),
         (supabase.from as any)("mentors").select("*"),
         supabase.from("skills").select("*"),
+        (supabase.from as any)("fun_projects").select("*").catch?.(() => ({ data: null })) ?? Promise.resolve({ data: null }),
         supabase.from("site_content").select("*"),
       ]);
       const contentMap: Record<string, string> = {};
       (sc.data || []).forEach((row: any) => { contentMap[row.key] = row.value; });
-      setData({ projects: p.data || [], achievements: a.data || [], mentors: m.data || [], skills: s.data || [], content: contentMap });
+      setData({ projects: p.data || [], achievements: a.data || [], mentors: m.data || [], skills: s.data || [], funProjects: f.data || [], content: contentMap });
     })();
   }, []);
 
@@ -40,46 +46,54 @@ const ChatbotPage = () => {
     const t = ` ${q.toLowerCase().trim()} `;
     if (!t.trim()) return "Please type a question.";
 
-    // Score each intent by keyword hits so the strongest topic wins,
+    // Score each intent by whole-word keyword hits so the strongest topic wins,
     // instead of the first regex accidentally swallowing the query.
     const has = (words: string[]) =>
       words.reduce((n, w) => n + (new RegExp(`\\b${w}\\b`).test(t) ? 1 : 0), 0);
 
     const scores = {
       greet: has(["hi", "hello", "hey", "namaste", "yo"]),
-      projects: has(["project", "projects", "build", "built", "made", "wildsentry", "ev", "armour", "ric", "pendant", "iot", "summary", "smart"]),
-      mentors: has(["mentor", "mentors", "guide", "teacher", "teachers"]),
-      achievements: has(["achievement", "achievements", "award", "awards", "won", "prize", "head", "boy", "kidovation"]),
-      skills: has(["skill", "skills", "know", "learning", "technology", "tech", "languages", "stack"]),
-      contact: has(["contact", "email", "reach", "hire", "phone", "message"]),
-      education: has(["school", "study", "class", "education", "grade", "cbse", "college"]),
-      goal: has(["goal", "future", "dream", "career", "ambition"]),
-      about: has(["who", "about", "yourself", "dheer", "bio", "introduce", "introduction"]),
+      projects: has(["project", "projects", "build", "built", "made", "wildsentry", "ev", "armour", "ric", "pendant", "iot", "summary", "smart", "device", "invention"]),
+      fun: has(["fun", "hobby", "hobbies", "side", "experiment", "experiments", "gadget", "gadgets", "diy"]),
+      mentors: has(["mentor", "mentors", "guide", "guides", "teacher", "teachers"]),
+      achievements: has(["achievement", "achievements", "award", "awards", "won", "prize", "head", "boy", "kidovation", "recognition", "winner"]),
+      skills: has(["skill", "skills", "know", "learning", "technology", "tech", "languages", "stack", "expertise"]),
+      contact: has(["contact", "email", "mail", "reach", "hire", "phone", "message", "talk", "whatsapp", "instagram", "linkedin", "social"]),
+      education: has(["school", "study", "studies", "class", "education", "grade", "cbse", "college", "student", "age", "old"]),
+      goal: has(["goal", "goals", "future", "dream", "career", "ambition", "plan", "plans"]),
+      about: has(["who", "about", "yourself", "dheer", "bio", "introduce", "introduction", "person", "him"]),
+      location: has(["where", "location", "vadodara", "gujarat", "city", "from", "live", "lives", "lives"]),
       thanks: has(["thank", "thanks", "thx"]),
     };
 
     const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
     if (!best || best[1] === 0) {
-      return "I can answer about his projects, mentors, achievements, skills, education, goals or contact. Try: 'Give me a summary of every project'.";
+      return NOT_ON_SITE;
     }
 
     switch (best[0]) {
       case "greet":
-        return "Hey! Ask me about Dheer's projects, mentors, achievements or skills.";
+        return "Hey! Ask me about Dheer's projects, mentors, achievements, skills, education, goals — or how to reach him.";
       case "projects": {
-        if (data.projects.length === 0) return "Projects include WildSentry, EV Armour, and Ric — an AI IoT pendant.";
-        return "Here are all of his projects:\n\n" + data.projects.map((p: any, i: number) => {
+        if (data.projects.length === 0) return "Projects include WildSentry (AI wildlife protection), EV Armour, and Ric — an AI IoT pendant.";
+        const lines = data.projects.map((p: any, i: number) => {
           const desc = strip(p.description || "").trim();
           const tech = p.tech_stack ? `\n   Tech: ${Array.isArray(p.tech_stack) ? p.tech_stack.join(", ") : p.tech_stack}` : "";
-          return `${i + 1}. ${p.title}\n   ${desc}${tech}`;
+          const link = p.website_url ? `\n   Website: ${p.website_url}` : "";
+          return `${i + 1}. ${p.title}\n   ${desc}${tech}${link}`;
         }).join("\n\n");
+        return "Here's the full summary of every project on the portfolio:\n\n" + lines;
+      }
+      case "fun": {
+        if (data.funProjects.length === 0) return NOT_ON_SITE;
+        return "His fun / side projects:\n" + data.funProjects.map((f: any) => `• ${f.name || f.title}${f.category ? " — " + f.category : ""}`).join("\n");
       }
       case "mentors":
-        if (data.mentors.length === 0) return "Mentor list isn't set up yet.";
-        return "Mentors:\n" + data.mentors.map((m: any) => `• ${m.name}${m.description ? " — " + m.description : ""}`).join("\n");
+        if (data.mentors.length === 0) return NOT_ON_SITE;
+        return "The people guiding him:\n" + data.mentors.map((m: any) => `• ${m.name}${m.description ? " — " + strip(m.description) : ""}`).join("\n");
       case "achievements":
         if (data.achievements.length === 0) return "Notable: Head Boy of school, Kidovation Innovation Award.";
-        return "Achievements:\n" + data.achievements.map((a: any) => `• ${a.title} — ${a.description}`).join("\n");
+        return "His achievements:\n" + data.achievements.map((a: any) => `• ${a.title} — ${strip(a.description || "")}`).join("\n");
       case "skills": {
         if (data.skills.length === 0) return "Skills: AI/ML, IoT, Arduino, Python, JavaScript, leadership.";
         const byCat: Record<string, string[]> = {};
@@ -87,19 +101,22 @@ const ChatbotPage = () => {
         return Object.entries(byCat).map(([k, v]) => `${k}: ${v.join(", ")}`).join("\n");
       }
       case "contact":
-        return "Use the Contact section on the home page — a phone number is required to send a message.";
+        return CONTACT_LINE + " (the contact form needs a phone number so he can reply).";
       case "education":
         return "Dheer is a CBSE student from Vadodara, India, and plans to pursue B.Tech in Computer Science Engineering.";
       case "goal":
         return "Goal: pursue B.Tech CSE and build technologies that make the world safer and smarter.";
+      case "location":
+        return "Dheer is from Vadodara, Gujarat, India.";
       case "about": {
-        const p = data.content.about_paragraph_1 || "I'm Dheer Joshi — a student innovator from Vadodara building AI + IoT projects.";
-        return strip(p);
+        const p1 = data.content.about_paragraph_1 || "I'm Dheer Joshi — a student innovator from Vadodara building AI + IoT projects.";
+        const p2 = data.content.about_paragraph_2 ? "\n\n" + strip(data.content.about_paragraph_2) : "";
+        return strip(p1) + p2;
       }
       case "thanks":
-        return "You're welcome!";
+        return "You're welcome! Anything else you'd like to know about Dheer?";
       default:
-        return "Try asking about projects, mentors, achievements or skills.";
+        return NOT_ON_SITE;
     }
   };
 
@@ -109,7 +126,7 @@ const ChatbotPage = () => {
     setInput("");
   };
 
-  const suggestions = ["Who is Dheer?", "Tell me about his projects", "Who are his mentors?", "What are his achievements?", "What skills does he have?"];
+  const suggestions = ["Who is Dheer?", "Give me a summary of every project", "Who are his mentors?", "What are his achievements?", "What skills does he have?", "How can I contact him?"];
 
   return (
     <SectionPageShell>
