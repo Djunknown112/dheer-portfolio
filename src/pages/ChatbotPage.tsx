@@ -31,7 +31,9 @@ export const createBot = (data: any) => (q: string): string => {
     contact: has(["contact", "email", "mail", "reach", "hire", "phone", "message", "talk", "whatsapp", "instagram", "linkedin", "social"]),
     education: has(["school", "study", "studies", "class", "education", "grade", "cbse", "college", "student", "age", "old"]),
     goal: has(["goal", "goals", "future", "dream", "career", "ambition", "plan", "plans"]),
-    about: has(["who", "about", "yourself", "dheer", "bio", "introduce", "introduction", "person", "him"]),
+    // "about" only fires on identity words — generic "tell me about X"
+    // questions must fall through to the contact-Dheer fallback.
+    about: has(["dheer", "yourself", "bio", "introduce", "introduction"]),
     location: has(["where", "location", "vadodara", "gujarat", "city", "from", "live", "lives"]),
     thanks: has(["thank", "thanks", "thx"]),
   };
