@@ -2,11 +2,20 @@ import { describe, it, expect } from "vitest";
 import { createBot } from "@/pages/ChatbotPage";
 
 const bot = createBot({
-  projects: [{ title: "WildSentry", description: "AI wildlife protection", technologies: ["Python"], website_link: "https://wildsentry-ai-wildlife-protection.vercel.app/" }],
-  achievements: [{ title: "Kidovation Award", description: "Innovation winner" }],
+  projects: [
+    { title: "WildSentry", description: "AI wildlife protection", technologies: ["Python"], features: ["GPS Tracking"], website_link: "https://wildsentry-ai-wildlife-protection.vercel.app/", youtube_link: null },
+    { title: "EV Armour", description: "EV battery safety", technologies: ["Sensors"], features: [], website_link: null, youtube_link: null },
+  ],
+  achievements: [
+    { title: "Kidovation Award", description: "Innovation winner" },
+    { title: "GharLoop — Smart Household Life OS (Swiggy Builders Club)", description: "Smart household system" },
+  ],
   mentors: [{ name: "Mentor A", description: "Guide" }],
-  skills: [{ name: "Python", category: "Technical" }],
-  funProjects: [{ name: "Fun Gadget", category: "DIY" }],
+  skills: [
+    { name: "Python", category: "Technical" },
+    { name: "Leadership", category: "Soft Skill" },
+  ],
+  funProjects: [{ name: "Fun Gadget", category: "DIY", description: "Side build" }],
   content: { about_paragraph_1: "I'm Dheer Joshi — student innovator." },
 });
 
@@ -17,14 +26,38 @@ describe("chatbot rules", () => {
     expect(out).toContain("wildsentry-ai-wildlife-protection.vercel.app");
   });
 
-  it("lists achievements, mentors and skills from site data", () => {
-    expect(bot("what are his achievements?")).toContain("Kidovation Award");
+  it("understands varied phrasing about projects and work", () => {
+    expect(bot("what has he done so far?")).toContain("WildSentry");
+    expect(bot("tell me about the things he is working on")).toContain("WildSentry");
+    expect(bot("list everything he has built")).toContain("EV Armour");
+  });
+
+  it("looks up a specific project by name from live data", () => {
+    const out = bot("tell me about WildSentry and how it works");
+    expect(out).toContain("WildSentry");
+    expect(out).toContain("AI wildlife protection");
+    expect(out).toContain("GPS Tracking");
+  });
+
+  it("looks up a specific achievement by name", () => {
+    const out = bot("what is gharloop?");
+    expect(out).toContain("GharLoop");
+    expect(out).toContain("Smart household system");
+  });
+
+  it("answers combined questions with both topics", () => {
+    const out = bot("what are his achievements and skills?");
+    expect(out).toContain("Kidovation Award");
+    expect(out).toContain("Python");
+  });
+
+  it("lists mentors and skills from site data", () => {
     expect(bot("who are his mentors?")).toContain("Mentor A");
     expect(bot("what skills does he have?")).toContain("Python");
   });
 
   it("tells unknown topics to contact Dheer directly", () => {
-    const out = bot("tell me about his underwater basket weaving robot");
+    const out = bot("tell me about his underwater basket weaving hobby");
     expect(out).toContain("dheerjoshi2606@gmail.com");
     expect(out.toLowerCase()).toContain("not have updated the portfolio");
   });
