@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Trophy, Crown, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ShowMoreLink from "@/components/ShowMoreLink";
@@ -27,13 +27,10 @@ const AchievementsSection = ({ limit }: Props) => {
     fetchData();
   }, []);
 
-  // Group cards by similar description length so rows look uniform.
-  const sorted = useMemo(() => {
-    return [...achievements].sort((a, b) => (b.description?.length ?? 0) - (a.description?.length ?? 0));
-  }, [achievements]);
-
-  const visible = limit ? sorted.slice(0, limit) : sorted;
-  const hasMore = limit ? sorted.length > limit : false;
+  // Admin drag order (sort_order from the DB) is authoritative everywhere —
+  // no client-side re-sorting, so home and /achievements show the same sequence.
+  const visible = limit ? achievements.slice(0, limit) : achievements;
+  const hasMore = limit ? achievements.length > limit : false;
 
   return (
     <section id="achievements" className="section-padding" ref={ref}>
@@ -82,7 +79,7 @@ const AchievementsSection = ({ limit }: Props) => {
           </div>
 
           {hasMore && (
-            <ShowMoreLink to="/achievements" count={sorted.length - (limit ?? 0)} label="See all achievements" />
+            <ShowMoreLink to="/achievements" count={achievements.length - (limit ?? 0)} label="See all achievements" />
           )}
         </motion.div>
       </div>

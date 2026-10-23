@@ -48,8 +48,8 @@ export const createBot = (data: any) => (q: string): string => {
       if (data.projects.length === 0) return "Projects include WildSentry (AI wildlife protection), EV Armour, and Ric — an AI IoT pendant.";
       const lines = data.projects.map((p: any, i: number) => {
         const desc = stripHtml(p.description || "").trim();
-        const tech = p.tech_stack ? `\n   Tech: ${Array.isArray(p.tech_stack) ? p.tech_stack.join(", ") : p.tech_stack}` : "";
-        const link = p.website_url ? `\n   Website: ${p.website_url}` : "";
+        const tech = p.technologies ? `\n   Tech: ${Array.isArray(p.technologies) ? p.technologies.join(", ") : p.technologies}` : "";
+        const link = p.website_link ? `\n   Website: ${p.website_link}` : "";
         return `${i + 1}. ${p.title}\n   ${desc}${tech}${link}`;
       }).join("\n\n");
       return "Here's the full summary of every project on the portfolio:\n\n" + lines;

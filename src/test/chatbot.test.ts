@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { createBot } from "@/pages/ChatbotPage";
 
 const bot = createBot({
-  projects: [{ title: "WildSentry", description: "AI wildlife protection", tech_stack: ["Python"], website_url: "https://wildsentry-ai-wildlife-protection.vercel.app/" }],
+  projects: [{ title: "WildSentry", description: "AI wildlife protection", technologies: ["Python"], website_link: "https://wildsentry-ai-wildlife-protection.vercel.app/" }],
   achievements: [{ title: "Kidovation Award", description: "Innovation winner" }],
   mentors: [{ name: "Mentor A", description: "Guide" }],
   skills: [{ name: "Python", category: "Technical" }],
